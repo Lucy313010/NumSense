@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'compare_items_screen.dart';
 import 'past_shopping_screen.dart';
 import 'active_shopping_list_screen.dart';
-
+import 'shopping_camera_screen.dart'
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CompareItemsScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ShoppingCameraScreen ())));
                 },
                 child: const Text("Snap A Photo -\nCompare Prices", textAlign: TextAlign.center, style: TextStyle(fontSize: 18)),
               ),

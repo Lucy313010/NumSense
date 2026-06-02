@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'my_stuff_screen.dart';
-import 'photo_branch_screen.dart';
 import 'calculator_screen.dart';
+import 'shopping_camera_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const PhotoBranchScreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ShoppingCameraScreen()));
               },
               child: const Text("Snap a Photo"),
             ),
