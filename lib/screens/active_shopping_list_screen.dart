@@ -86,7 +86,7 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
                 );
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 100),
           ],
         ),
       ),
