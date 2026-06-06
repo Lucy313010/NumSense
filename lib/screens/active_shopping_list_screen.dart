@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
 import 'add_item_options_screen.dart';
 
-class ActiveShoppingListScreen extends StatelessWidget {
-  const ActiveShoppingListScreen({super.key});
+class ActiveShoppingListScreen extends StatefulWidget {
+  final double initialBudget;
+
+  const ActiveShoppingListScreen({super.key, required this.initialBudget});
+
+  @override
+  State<ActiveShoppingListScreen> createState() => _ActiveShoppingListScreenState();
+}
+
+class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
+  late double _currentBudgetValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentBudgetValue = widget.initialBudget;
+  }
+
+  Color _getSliderColor() {
+    if (_currentBudgetValue < 60) return Colors.blueAccent;
+    if (_currentBudgetValue < 140) return Colors.orangeAccent;
+    return Colors.redAccent;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,18 +32,49 @@ class ActiveShoppingListScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ElevatedButton.icon(
-              icon: const Icon(Icons.wallet),
-              label: const Text("Insert Budget"),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
-              onPressed: () {
-        
-              },
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                '\$${_currentBudgetValue.toStringAsFixed(0)}',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  color: _getSliderColor(),
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 20,
+                trackShape: const RoundedRectSliderTrackShape(),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 16),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 26),
+                valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+                valueIndicatorTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              child: Slider(
+                value: _currentBudgetValue,
+                min: 10.0,
+                max: 200.0,
+                divisions: 19,
+                label: '\$${_currentBudgetValue.toStringAsFixed(0)}',
+                activeColor: _getSliderColor(),
+                inactiveColor: Colors.grey[200],
+                onChanged: (double value) {
+                  setState(() {
+                    _currentBudgetValue = value;
+                  });
+                },
+              ),
+            ),
+            const Spacer(),
             ElevatedButton.icon(
               icon: const Icon(Icons.add_shopping_cart),
               label: const Text("Add Item"),
@@ -34,6 +86,7 @@ class ActiveShoppingListScreen extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

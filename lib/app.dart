@@ -1,3 +1,4 @@
+import 'package:app/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }

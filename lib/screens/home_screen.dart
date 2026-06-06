@@ -3,8 +3,11 @@ import 'compare_items_screen.dart';
 import 'past_shopping_screen.dart';
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
+
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final double initialBudget;
+
+  const HomeScreen({super.key, required this.initialBudget});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class HomeScreen extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ActiveShoppingListScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ActiveShoppingListScreen(initialBudget: 50)));
                 },
                 child: const Text("Start Shopping", style: TextStyle(fontSize: 18)),
               ),
