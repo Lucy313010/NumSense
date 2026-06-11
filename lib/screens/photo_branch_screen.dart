@@ -33,20 +33,6 @@ class PhotoBranchScreen extends StatelessWidget {
               const SizedBox(height: 24),
               
         
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-    
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const CalendarOptionsScreen()),
-                  );
-                },
-                child: const Text("Calendar or Invitation"),
-              ),
             ],
           ),
         ),
