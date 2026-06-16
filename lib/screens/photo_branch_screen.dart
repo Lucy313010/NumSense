@@ -25,7 +25,7 @@ class PhotoBranchScreen extends StatelessWidget {
                  
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ShoppingCameraScreen()),
+                    MaterialPageRoute(builder: (context) => const ShoppingCameraScreen(captureType: "Shopping Item")),
                   );
                 },
                 child: const Text("Shopping Item"),
