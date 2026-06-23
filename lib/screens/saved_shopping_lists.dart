@@ -79,7 +79,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
             ),
           ),
 
-          // What other features of Google Drive do I imitate?
+         
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: Row(
@@ -159,7 +159,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // File/Folder asset design element
+                      
                       Icon(
                         Icons.insert_drive_file, 
                         color: isOverBudget ? Colors.redAccent : Colors.green, 
