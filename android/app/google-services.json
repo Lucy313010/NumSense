@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "506046385031",
+    "project_id": "cacrachellucycollab",
+    "storage_bucket": "cacrachellucycollab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506046385031:android:45626a0b0e6e1cb17aa122",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCykk_t7lIwt3reasfyForU5fdDPPhYHcY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
