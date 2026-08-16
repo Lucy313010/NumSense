@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'active_shopping_list_screen.dart';
+import 'home_screen.dart'; 
+
 class BudgetSetupScreen extends StatefulWidget {
   const BudgetSetupScreen({super.key});
 
@@ -8,10 +9,8 @@ class BudgetSetupScreen extends StatefulWidget {
 }
 
 class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
-  
   double _currentBudgetValue = 50.0;
 
-  // consult parents for good budget ranges
   Color _getSliderColor() {
     if (_currentBudgetValue < 60) return Colors.blueAccent;
     if (_currentBudgetValue < 140) return Colors.orangeAccent;
@@ -21,7 +20,7 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
   void _handleContinue() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => ActiveShoppingListScreen(initialBudget: _currentBudgetValue),
+        builder: (context) => HomeScreen(initialBudget: _currentBudgetValue),
       ),
     );
   }
@@ -65,7 +64,7 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
                   trackHeight: 24, 
                   trackShape: const RoundedRectSliderTrackShape(),
                   thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 18, // Fixed: Removed the invalid pressedAdjustment parameter
+                    enabledThumbRadius: 18, 
                   ),
                   overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
                   valueIndicatorShape: const PaddleSliderValueIndicatorShape(),

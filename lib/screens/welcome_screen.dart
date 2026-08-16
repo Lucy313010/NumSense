@@ -18,7 +18,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   Future<void> _startWelcomeSequence() async {
-    //need to test what time is good
+
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
     setState(() {

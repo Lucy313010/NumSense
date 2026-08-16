@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; 
+import 'welcome_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleEmailLogin() {
     if (_formKey.currentState!.validate()) {
-      // authenticate
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Processing Email Login...')),
       );
@@ -31,7 +32,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleGoogleLogin() {
     // The google signin function popup thing
-    
+  }
+
+  void _handleGuestLogin() async {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing in as guest: $e')),
+      );
+    }
   }
 
   @override
@@ -138,7 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // --- Divider ---
                   Row(
                     children: const [
                       Expanded(child: Divider(thickness: 1)),
@@ -151,10 +167,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // --- Google Sign-In Button ---
+                  // Fixed OutlinedButton.icon syntax
                   OutlinedButton.icon(
                     onPressed: _handleGoogleLogin,
-                    icon: const Icon(Icons.g_mobiledata, size: 30, color: Colors.red), 
+                    icon: const Icon(Icons.g_mobiledata, size: 30, color: Colors.red),
                     label: const Text(
                       'Sign in with Google',
                       style: TextStyle(fontSize: 16, color: Colors.black87),
@@ -164,6 +180,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       side: const BorderSide(color: Colors.grey),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  TextButton(
+                    onPressed: _handleGuestLogin,
+                    child: const Text(
+                      'Continue as Guest',
+                      style: TextStyle(
+                        fontSize: 16, 
+                        color: Colors.blueAccent, 
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
