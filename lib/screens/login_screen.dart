@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart'; 
 import 'welcome_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
@@ -30,8 +31,50 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleGoogleLogin() {
-    // The google signin function popup thing
+  // Google sign in configuration
+  Future<void> _handleGoogleLogin() async {
+    try {
+      // 1. Trigger the google authentication flow popup
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      
+      if (googleUser == null) {
+        // User canceled the sign-in popup
+        return;
+      }
+
+      // 2. get authorization details from the user's Google account
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // 3. Create a secure credential for firebase using google's tokens
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // 4. Securely sign in to firebase with the credential
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      
+      // can access user data safely via userCredential.user
+      // examples: userCredential.user?.email, userCredential.user?.displayName
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Successfully signed in as ${userCredential.user?.displayName ?? "User"}!')),
+        );
+
+        // 5. navigate to app's main flow
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Google Sign-In Error: $e')),
+        );
+      }
+    }
   }
 
   void _handleGuestLogin() async {
@@ -167,7 +210,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Fixed OutlinedButton.icon syntax
                   OutlinedButton.icon(
                     onPressed: _handleGoogleLogin,
                     icon: const Icon(Icons.g_mobiledata, size: 30, color: Colors.red),
