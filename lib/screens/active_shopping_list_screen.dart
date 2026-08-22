@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'add_item_options_screen.dart';
+import 'budget_manager.dart';
 
 class ActiveShoppingListScreen extends StatefulWidget {
-  final double initialBudget;
-
-  const ActiveShoppingListScreen({super.key, required this.initialBudget});
+  const ActiveShoppingListScreen({super.key});
 
   @override
   State<ActiveShoppingListScreen> createState() => _ActiveShoppingListScreenState();
@@ -16,7 +15,7 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
   @override
   void initState() {
     super.initState();
-    _currentBudgetValue = widget.initialBudget;
+    _currentBudgetValue = BudgetManager.instance.currentBudget;
   }
 
   Color _getSliderColor() {
@@ -71,6 +70,7 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
                   setState(() {
                     _currentBudgetValue = value;
                   });
+                  BudgetManager.instance.setBudget(value);
                 },
               ),
             ),

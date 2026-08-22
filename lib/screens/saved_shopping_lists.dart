@@ -27,17 +27,15 @@ class MasterShoppingListsScreen extends StatefulWidget {
 }
 
 class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
-  // Replace this with FireStone (random data)
   final List<SavedShoppingList> _mockSavedLists = [
     SavedShoppingList(id: '1', storeName: 'Shop', date: DateTime(2026, 5, 28), totalSpent: 1.0, budget: 50.00, itemCount: 1),
    ];
 
   String _searchQuery = "";
-  bool _isGridView = true; 
+  bool _isGridView = true;
 
   @override
   Widget build(BuildContext context) {
-    // search function
     final filteredLists = _mockSavedLists.where((list) {
       return list.storeName.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
@@ -56,7 +54,6 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -78,15 +75,13 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
               ),
             ),
           ),
-
-         
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Recent Files", 
+                  "Recent Files",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[700]),
                 ),
                 Text(
@@ -97,8 +92,6 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
             ),
           ),
           const SizedBox(height: 8),
-
-          // make the lists go to grid
           Expanded(
             child: filteredLists.isEmpty
                 ? _buildEmptyState()
@@ -108,24 +101,20 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
           ),
         ],
       ),
-      
-      // new list button
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text("New Shopping Trip"),
         onPressed: () {
-          // go to active shopping list
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ActiveShoppingListScreen(initialBudget: 50)),
+            MaterialPageRoute(builder: (context) => const ActiveShoppingListScreen()),
           );
         },
       ),
     );
   }
-
 
   Widget _buildDriveGrid(List<SavedShoppingList> lists) {
     return GridView.builder(
@@ -159,10 +148,9 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      
                       Icon(
-                        Icons.insert_drive_file, 
-                        color: isOverBudget ? Colors.redAccent : Colors.green, 
+                        Icons.insert_drive_file,
+                        color: isOverBudget ? Colors.redAccent : Colors.green,
                         size: 32,
                       ),
                       _buildMoreOptions(item),
@@ -194,7 +182,6 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
     );
   }
 
-
   Widget _buildDriveList(List<SavedShoppingList> lists) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -213,7 +200,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
           ),
           child: ListTile(
             leading: Icon(
-              Icons.insert_drive_file, 
+              Icons.insert_drive_file,
               color: isOverBudget ? Colors.redAccent : Colors.green,
             ),
             title: Text(item.storeName, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -224,7 +211,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                 Text(
                   "\$${item.totalSpent.toStringAsFixed(2)}",
                   style: TextStyle(
-                    fontWeight: FontWeight.bold, 
+                    fontWeight: FontWeight.bold,
                     color: isOverBudget ? Colors.red : Colors.black87,
                   ),
                 ),
@@ -311,9 +298,9 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                 children: [
                   const Text("Final Amount Checked Out:"),
                   Text(
-                    "\$${item.totalSpent.toStringAsFixed(2)}", 
+                    "\$${item.totalSpent.toStringAsFixed(2)}",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold, 
+                      fontWeight: FontWeight.bold,
                       color: item.totalSpent > item.budget ? Colors.red : Colors.green,
                     ),
                   ),

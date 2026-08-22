@@ -5,14 +5,12 @@ import 'compare_items_screen.dart';
 import 'past_shopping_screen.dart';
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
-import 'login_screen.dart'; 
-
+import 'login_screen.dart';
+import 'budget_manager.dart';
 
 class HomeScreen extends StatelessWidget {
-  final double initialBudget;
-
-  const HomeScreen({super.key, required this.initialBudget});
-
+  const HomeScreen({super.key});
+  
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
@@ -91,10 +89,10 @@ class HomeScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                       onPressed: () {
                         Navigator.push(
-                          context, 
+                          context,
                           MaterialPageRoute(
-                            builder: (context) => ActiveShoppingListScreen(initialBudget: initialBudget)
-                          )
+                            builder: (context) => const ActiveShoppingListScreen(),
+                          ),
                         );
                       },
                       child: const Text("Start Shopping", style: TextStyle(fontSize: 18)),
