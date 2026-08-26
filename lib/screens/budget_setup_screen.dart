@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; 
+import 'budget_manager.dart';
 
 class BudgetSetupScreen extends StatefulWidget {
   const BudgetSetupScreen({super.key});
@@ -18,9 +19,10 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
   }
 
   void _handleContinue() {
+    BudgetManager.instance.setBudget(_currentBudgetValue);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => HomeScreen(initialBudget: _currentBudgetValue),
+        builder: (context) => const HomeScreen(),
       ),
     );
   }
