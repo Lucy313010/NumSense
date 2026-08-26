@@ -70,5 +70,7 @@
 	<string>This app needs camera access to scan physical calendars and shopping items.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs photo library access to upload existing photos.</string>
+	NSLocationWhenInUseUsageDescription
+	This app needs access to your location to map cognitive comfort ratings for nearby stores.	
 </dict>
 </plist>
