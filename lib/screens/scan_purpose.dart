@@ -1,0 +1,1 @@
+  enum ScanPurpose { addToCart, comparePrice }

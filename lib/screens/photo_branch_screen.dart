@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'shopping_camera_screen.dart';
+import 'scan_purpose.dart';
 
 class PhotoBranchScreen extends StatelessWidget {
   const PhotoBranchScreen({super.key});
@@ -15,24 +16,25 @@ class PhotoBranchScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () {
-                 
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ShoppingCameraScreen(captureType: "Shopping Item")),
+                    MaterialPageRoute(
+                      builder: (context) => const ShoppingCameraScreen(
+                        captureType: "Shopping Item",
+                        purpose: ScanPurpose.addToCart,
+                      ),
+                    ),
                   );
                 },
                 child: const Text("Shopping Item"),
               ),
               const SizedBox(height: 24),
-              
-        
             ],
           ),
         ),

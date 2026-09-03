@@ -22,6 +22,7 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
     BudgetManager.instance.setBudget(_currentBudgetValue);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/home'),
         builder: (context) => const HomeScreen(),
       ),
     );

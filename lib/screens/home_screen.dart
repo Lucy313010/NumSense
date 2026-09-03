@@ -6,11 +6,11 @@ import 'past_shopping_screen.dart';
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
 import 'login_screen.dart';
-import 'budget_manager.dart';
+import 'scan_purpose.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
@@ -61,36 +61,40 @@ class HomeScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                       onPressed: () {
                         Navigator.push(
-                          context, 
-                          MaterialPageRoute(builder: (context) => const ShoppingCameraScreen(captureType: 'item')),
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ShoppingCameraScreen(
+                              captureType: 'item',
+                              purpose: ScanPurpose.comparePrice,
+                            ),
+                          ),
                         );
                       },
                       child: const Text(
-                        "Snap A Photo -\nCompare Prices", 
-                        textAlign: TextAlign.center, 
-                        style: TextStyle(fontSize: 18)
+                        "Snap A Photo -\nCompare Prices",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 18),
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                       onPressed: () {
                         Navigator.push(
-                          context, 
-                          MaterialPageRoute(builder: (context) => const PastShoppingScreen())
+                          context,
+                          MaterialPageRoute(builder: (context) => const PastShoppingScreen()),
                         );
                       },
                       child: const Text("Past Shopping Items", style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 24),
-
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
+                            settings: const RouteSettings(name: '/activeList'),
                             builder: (context) => const ActiveShoppingListScreen(),
                           ),
                         );
