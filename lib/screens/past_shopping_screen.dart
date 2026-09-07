@@ -1,28 +1,3 @@
-import 'package:flutter/material.dart';
-import 'active_shopping_list_screen.dart';
-
-class SavedShoppingList {
-  final String id;
-  final String storeName;
-  final DateTime date;
-  final double totalSpent;
-  final double budget;
-  final int itemCount;
-  final String dealIndicator;
-
-  SavedShoppingList({
-    required this.id,
-    required this.storeName,
-    required this.date,
-    required this.totalSpent,
-    required this.budget,
-    required this.itemCount,
-    required this.dealIndicator,
-  });
-}
-
-class PastShoppingScreen extends StatefulWidget {
-  const PastShoppingScreen({super.key});
 
   @override
   State<PastShoppingScreen> createState() => _PastShoppingScreenState();
