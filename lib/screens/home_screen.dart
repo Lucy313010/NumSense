@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'compare_items_screen.dart';
 import 'past_shopping_screen.dart';
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
 import 'login_screen.dart';
-<<<<<<< HEAD
 import 'community_map_screen.dart';
-=======
 import 'budget_manager.dart';
->>>>>>> cf7ac2a08cd6a9e43d2980edf044ab97180ff3e0
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
@@ -111,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ActiveShoppingListScreen(
-                              initialBudget: initialBudget,
+                              initialBudget: BudgetManager.instance.currentBudget,
                             ),
                           ),
                         );
@@ -137,11 +133,7 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-<<<<<<< HEAD
                             builder: (context) => const CommunityMapScreen(),
-=======
-                            builder: (context) => const ActiveShoppingListScreen(),
->>>>>>> cf7ac2a08cd6a9e43d2980edf044ab97180ff3e0
                           ),
                         );
                       },

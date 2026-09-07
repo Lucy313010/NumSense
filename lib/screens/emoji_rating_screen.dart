@@ -36,7 +36,7 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
       await FirebaseFirestore.instance.collection('cognitive_ratings').add({
         'latitude': position.latitude,
         'longitude': position.longitude,
-        'rating': ratingScore, 
+        'rating': ratingScore,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
@@ -44,10 +44,11 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Thanks for helping the community! 🩵')),
         );
-        // Route back to home screen
+        
+        // Route back to home screen (Fixed: removed initialBudget)
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen(initialBudget: widget.initialBudget)),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
           (route) => false,
         );
       }
