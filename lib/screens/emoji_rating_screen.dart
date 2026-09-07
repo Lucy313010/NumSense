@@ -45,7 +45,10 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
           const SnackBar(content: Text('Thanks for helping the community! 🩵')),
         );
         
+<<<<<<< HEAD
         // Route back to home screen (Fixed: removed initialBudget)
+=======
+>>>>>>> 673a5c2... made changes on top of Lucy's fixed mlkit code, consolidated my features with hers
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),

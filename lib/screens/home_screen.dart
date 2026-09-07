@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+<<<<<<< HEAD
 import 'past_shopping_screen.dart';
+=======
+import 'compare_items_screen.dart';
+import 'saved_shopping_lists.dart'; // FIXED IMPORT
+>>>>>>> 673a5c2... made changes on top of Lucy's fixed mlkit code, consolidated my features with hers
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
 import 'login_screen.dart';
@@ -86,9 +91,10 @@ class HomeScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                       ),
                       onPressed: () {
+                        // FIXED ROUTE: Now goes to your awesome saved lists screen!
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const PastShoppingScreen()),
+                          MaterialPageRoute(builder: (context) => const MasterShoppingListsScreen()),
                         );
                       },
                       child: const Text(

@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'nearby_shop.dart'; // Just use the relative path
 
 class LocationScreen extends StatelessWidget { // Renamed from LoginScreen
   const LocationScreen({super.key}); // Updated constructor
+=======
+import 'nearby_shop.dart'; // Make sure the path matches your project
+
+class LocationScreen extends StatelessWidget {
+  const LocationScreen({super.key});
+>>>>>>> 673a5c2... made changes on top of Lucy's fixed mlkit code, consolidated my features with hers
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +32,10 @@ class LocationScreen extends StatelessWidget { // Renamed from LoginScreen
                 },
                 child: const Text("What is your location?", style: TextStyle(fontSize: 18)),
               ),
+<<<<<<< HEAD
+=======
+              const SizedBox(height: 24),
+>>>>>>> 673a5c2... made changes on top of Lucy's fixed mlkit code, consolidated my features with hers
             ],
           ),
         ),
