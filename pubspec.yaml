@@ -36,20 +36,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   image_picker: ^1.2.2
   google_mlkit_text_recognition: ^0.15.1
-  firebase_auth:
+  firebase_auth: ^5.7.0
   firebase_core: ^3.0.0
   google_sign_in: ^6.2.1
-  cloud_firestore: ^5.6.12
-  geolocator: ^14.0.3
-<<<<<<< HEAD
   geolocator: ^14.0.3
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   cloud_firestore: ^5.6.12
-=======
-  cloud_firestore: ^5.6.12
-  geolocator: ^14.0.3
->>>>>>> 673a5c2... made changes on top of Lucy's fixed mlkit code, consolidated my features with hers
 
 dev_dependencies:
   flutter_test:

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-<<<<<<< HEAD
-import 'past_shopping_screen.dart';
-=======
-import 'compare_items_screen.dart';
-import 'saved_shopping_lists.dart'; // FIXED IMPORT
+import 'saved_shopping_lists.dart'; 
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
 import 'login_screen.dart';
 import 'community_map_screen.dart';
 import 'scan_purpose.dart';
+import 'budget_manager.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -90,7 +86,6 @@ class HomeScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                       ),
                       onPressed: () {
-                        // FIXED ROUTE: Now goes to your awesome saved lists screen!
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const MasterShoppingListsScreen()),

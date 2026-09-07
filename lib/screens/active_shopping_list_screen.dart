@@ -5,24 +5,18 @@ import 'cart_manager.dart';
 import 'emoji_rating_screen.dart';
 
 class ActiveShoppingListScreen extends StatelessWidget {
-  const ActiveShoppingListScreen({super.key});
+  final double? initialBudget;
+  final String? storeName;
 
-  @override
-  State<ActiveShoppingListScreen> createState() => _ActiveShoppingListScreenState();
-}
+  const ActiveShoppingListScreen({
+    super.key,
+    this.initialBudget,
+    this.storeName,
+  });
 
-class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
-  late double _currentBudgetValue;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentBudgetValue = BudgetManager.instance.currentBudget;
-  }
-
-  Color _getSliderColor() {
-    if (_currentBudgetValue < 60) return Colors.blueAccent;
-    if (_currentBudgetValue < 140) return Colors.orangeAccent;
+  Color _getSliderColor(double value) {
+    if (value < 60) return Colors.blueAccent;
+    if (value < 140) return Colors.orangeAccent;
     return Colors.redAccent;
   }
 
@@ -30,36 +24,6 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Start Shopping")),
-<<<<<<< HEAD
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 10),
-            Center(
-              child: Text(
-                '\$${_currentBudgetValue.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w900,
-                  color: _getSliderColor(),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                trackHeight: 20,
-                trackShape: const RoundedRectSliderTrackShape(),
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 16),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 26),
-                valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
-                valueIndicatorTextStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-=======
       body: ValueListenableBuilder<double>(
         valueListenable: BudgetManager.instance.budget,
         builder: (context, budget, _) {
@@ -170,7 +134,6 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    // NEW CHECKOUT BUTTON TO TRIGGER EMOJI MAPS!
                     OutlinedButton.icon(
                       icon: const Icon(Icons.check_circle_outline),
                       label: const Text("Finish & Checkout"),
@@ -180,7 +143,6 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
                         side: const BorderSide(color: Colors.green, width: 2),
                       ),
                       onPressed: () {
-                        // Clear the cart for the next trip
                         CartManager.instance.clear();
                         Navigator.push(
                           context,
@@ -191,40 +153,11 @@ class _ActiveShoppingListScreenState extends State<ActiveShoppingListScreen> {
                       },
                     ),
                   ],
->>>>>>> 673a5c2... made changes on top of Lucy's fixed mlkit code, consolidated my features with hers
                 ),
-              ),
-              child: Slider(
-                value: _currentBudgetValue,
-                min: 10.0,
-                max: 200.0,
-                divisions: 19,
-                label: '\$${_currentBudgetValue.toStringAsFixed(0)}',
-                activeColor: _getSliderColor(),
-                inactiveColor: Colors.grey[200],
-                onChanged: (double value) {
-                  setState(() {
-                    _currentBudgetValue = value;
-                  });
-                  BudgetManager.instance.setBudget(value);
-                },
-              ),
-            ),
-            const Spacer(),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.add_shopping_cart),
-              label: const Text("Add Item"),
-              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddItemOptionsScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 100),
-          ],
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }

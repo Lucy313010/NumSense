@@ -40,7 +40,7 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
     }
   }
 
-  Future<Future<void>> _analyzeImage(File imageFile) async async {
+Future<void> _analyzeImage(File imageFile) async {
     if (_capturedImage == null) return;
 
     setState(() {
