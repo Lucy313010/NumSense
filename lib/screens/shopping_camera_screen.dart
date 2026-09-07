@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'confirm_text_screen.dart';
 import 'scan_purpose.dart';
 import 'receipt_parser.dart';
@@ -39,7 +40,9 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
     }
   }
 
-  Future<void> _analyzeImage(File imageFile) async {
+  Future<Future<void>> _analyzeImage(File imageFile) async async {
+    if (_capturedImage == null) return;
+
     setState(() {
       _isAnalyzing = true;
     });
@@ -109,7 +112,13 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
             ),
             const SizedBox(height: 30),
             if (_isAnalyzing)
-              const Center(child: CircularProgressIndicator())
+              const Column(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text("AI is reading the text...")
+                ],
+              )
             else
               ElevatedButton.icon(
                 icon: const Icon(Icons.photo_camera),

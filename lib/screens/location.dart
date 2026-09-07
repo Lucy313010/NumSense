@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:app/screens/nearby_shop.dart';
+import 'nearby_shop.dart'; // Just use the relative path
 
-class LoginScreen extends StatelessWidget {
-
-  const LoginScreen();
+class LocationScreen extends StatelessWidget { // Renamed from LoginScreen
+  const LocationScreen({super.key}); // Updated constructor
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,6 @@ class LoginScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              
               ElevatedButton(
                 style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
                 onPressed: () {
@@ -27,9 +25,6 @@ class LoginScreen extends StatelessWidget {
                 },
                 child: const Text("What is your location?", style: TextStyle(fontSize: 18)),
               ),
-              const SizedBox(height: 24),
-
-              
             ],
           ),
         ),

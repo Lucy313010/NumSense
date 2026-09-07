@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'compare_items_screen.dart';
 import 'past_shopping_screen.dart';
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
 import 'login_screen.dart';
+import 'community_map_screen.dart';
 import 'scan_purpose.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -41,11 +41,13 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
                       );
                     },
                     child: const Text("Sign Up"),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -58,7 +60,9 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -78,28 +82,61 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const PastShoppingScreen()),
                         );
                       },
-                      child: const Text("Past Shopping Items", style: TextStyle(fontSize: 18)),
+                      child: const Text(
+                        "Past Shopping Items",
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 24)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ActiveShoppingListScreen(
+                              initialBudget: BudgetManager.instance.currentBudget,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Start Shopping",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.map_outlined),
+                      label: const Text(
+                        "Community Safe Map",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        backgroundColor: Colors.black87,
+                        foregroundColor: Colors.white,
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             settings: const RouteSettings(name: '/activeList'),
-                            builder: (context) => const ActiveShoppingListScreen(),
+                            builder: (context) => const CommunityMapScreen(),
                           ),
                         );
                       },
-                      child: const Text("Start Shopping", style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),
