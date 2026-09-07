@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'confirm_text_screen.dart';
 
 class ShoppingCameraScreen extends StatefulWidget {
-  final String captureType; 
+  final String captureType;
 
   const ShoppingCameraScreen({super.key, required this.captureType});
 
@@ -27,22 +28,42 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
     }
   }
 
-  void _analyzeImage() {
+  Future<void> _analyzeImage() async {
+    if (_capturedImage == null) return;
+
     setState(() {
       _isAnalyzing = true;
     });
 
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      final inputImage = InputImage.fromFile(_capturedImage!);
+      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      
+      final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
+      String extractedText = recognizedText.text;
+      
+      textRecognizer.close();
+
       if (!mounted) return;
       setState(() {
         _isAnalyzing = false;
       });
 
+ 
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const ConfirmTextScreen()),
+        MaterialPageRoute(
+          builder: (context) => ConfirmTextScreen(scannedText: extractedText),
+        ),
       );
-    });
+    } catch (e) {
+      setState(() {
+        _isAnalyzing = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error reading text: $e")),
+      );
+    }
   }
 
   @override
@@ -59,7 +80,7 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
           children: [
             Text(
               "Please capture the ${widget.captureType.toLowerCase()}",
-              textAlign: TextAlign.center, 
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 30),
@@ -68,7 +89,7 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
               aspectRatio: 4 / 3,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black87, 
+                  color: Colors.black87,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: _capturedImage == null
@@ -82,7 +103,13 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
             const SizedBox(height: 30),
             
             if (_isAnalyzing)
-              const Center(child: CircularProgressIndicator())
+              const Column(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text("AI is reading the text...")
+                ],
+              )
             else
               ElevatedButton.icon(
                 icon: const Icon(Icons.photo_camera),
