@@ -8,6 +8,7 @@ class SavedShoppingList {
   final double totalSpent;
   final double budget;
   final int itemCount;
+  final String dealIndicator; // added from old past shopping screen
 
   SavedShoppingList({
     required this.id,
@@ -16,6 +17,7 @@ class SavedShoppingList {
     required this.totalSpent,
     required this.budget,
     required this.itemCount,
+    required this.dealIndicator,
   });
 }
 
@@ -28,11 +30,43 @@ class MasterShoppingListsScreen extends StatefulWidget {
 
 class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
   final List<SavedShoppingList> _mockSavedLists = [
-    SavedShoppingList(id: '1', storeName: 'Shop', date: DateTime(2026, 5, 28), totalSpent: 1.0, budget: 50.00, itemCount: 1),
-   ];
+    SavedShoppingList(
+      id: '1',
+      storeName: "Trader Joe's",
+      date: DateTime(2026, 8, 20),
+      totalSpent: 42.50,
+      budget: 50.00,
+      itemCount: 8,
+      dealIndicator: 'Great Deals',
+    ),
+    SavedShoppingList(
+      id: '2',
+      storeName: 'Walmart',
+      date: DateTime(2026, 8, 15),
+      totalSpent: 68.10,
+      budget: 60.00,
+      itemCount: 12,
+      dealIndicator: 'Standard Prices',
+    ),
+    SavedShoppingList(
+      id: '3',
+      storeName: 'Whole Foods',
+      date: DateTime(2026, 8, 02),
+      totalSpent: 92.00,
+      budget: 80.00,
+      itemCount: 6,
+      dealIndicator: 'High Prices',
+    ),
+  ];
 
   String _searchQuery = "";
   bool _isGridView = true;
+
+  Color _getBadgeColor(String indicator) {
+    if (indicator == 'Great Deals') return Colors.green;
+    if (indicator == 'Standard Prices') return Colors.orangeAccent;
+    return Colors.redAccent;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +77,8 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("My Shopping Lists", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Store History & Lists", style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(_isGridView ? Icons.list_alt : Icons.grid_view),
@@ -54,12 +89,13 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
       ),
       body: Column(
         children: [
+          // search box
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                hintText: "Search saved shopping lists...",
+                hintText: "Search store lists...",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -81,11 +117,11 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Recent Files",
+                  "Store Memory Files",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey[700]),
                 ),
                 Text(
-                  "${filteredLists.length} lists stored",
+                  "${filteredLists.length} stores recorded",
                   style: TextStyle(fontSize: 13, color: Colors.grey[500]),
                 ),
               ],
@@ -105,11 +141,13 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: const Text("New Shopping Trip"),
+        label: const Text("New Trip"),
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ActiveShoppingListScreen()),
+            MaterialPageRoute(
+              builder: (context) => const ActiveShoppingListScreen(initialBudget: 50),
+            ),
           );
         },
       ),
@@ -123,19 +161,20 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 14,
         mainAxisSpacing: 14,
-        childAspectRatio: 0.95,
+        childAspectRatio: 0.88,
       ),
       itemCount: lists.length,
       itemBuilder: (context, index) {
         final item = lists[index];
         final bool isOverBudget = item.totalSpent > item.budget;
+        final badgeColor = _getBadgeColor(item.dealIndicator);
 
         return Card(
           color: Colors.white,
-          elevation: 0.5,
+          elevation: 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.grey[200]!, width: 1),
+            side: BorderSide(color: Colors.grey[200]!),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -148,12 +187,25 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.insert_drive_file,
-                        color: isOverBudget ? Colors.redAccent : Colors.green,
-                        size: 32,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.storefront, color: Colors.blueAccent, size: 24),
                       ),
-                      _buildMoreOptions(item),
+                      Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(color: badgeColor, shape: BoxShape.circle),
+                          ),
+                          const SizedBox(width: 4),
+                          _buildMoreOptions(item),
+                        ],
+                      ),
                     ],
                   ),
                   const Spacer(),
@@ -164,15 +216,30 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
+                  Text("${item.itemCount} items bought", style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                  const SizedBox(height: 2),
                   Text(
-                    "${item.itemCount} items · \$${item.totalSpent.toStringAsFixed(2)}",
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    "\$${item.totalSpent.toStringAsFixed(2)}",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: isOverBudget ? Colors.red : Colors.green[700],
+                    ),
                   ),
                   const Divider(height: 16),
-                  Text(
-                    "${item.date.month}/${item.date.day}/${item.date.year}",
-                    style: TextStyle(fontSize: 11, color: Colors.grey[400], fontWeight: FontWeight.w500),
-                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.sell_outlined, size: 12, color: badgeColor),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          item.dealIndicator,
+                          style: TextStyle(fontSize: 11, color: badgeColor, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -189,6 +256,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
       itemBuilder: (context, index) {
         final item = lists[index];
         final bool isOverBudget = item.totalSpent > item.budget;
+        final badgeColor = _getBadgeColor(item.dealIndicator);
 
         return Card(
           color: Colors.white,
@@ -196,15 +264,34 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
           margin: const EdgeInsets.only(bottom: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey[100]!),
+            side: BorderSide(color: Colors.grey[200]!),
           ),
           child: ListTile(
-            leading: Icon(
-              Icons.insert_drive_file,
-              color: isOverBudget ? Colors.redAccent : Colors.green,
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.storefront, color: Colors.blueAccent),
             ),
             title: Text(item.storeName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text("${item.date.month}/${item.date.day}/${item.date.year} · ${item.itemCount} items"),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("${item.date.month}/${item.date.day}/${item.date.year} · ${item.itemCount} items"),
+                Row(
+                  children: [
+                    Icon(Icons.sell_outlined, size: 12, color: badgeColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      item.dealIndicator,
+                      style: TextStyle(fontSize: 11, color: badgeColor, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ],
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -212,7 +299,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
                   "\$${item.totalSpent.toStringAsFixed(2)}",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isOverBudget ? Colors.red : Colors.black87,
+                    color: isOverBudget ? Colors.red : Colors.green[700],
                   ),
                 ),
                 _buildMoreOptions(item),
@@ -249,7 +336,11 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
         const PopupMenuItem(
           value: 'delete',
           child: Row(
-            children: [Icon(Icons.delete_outline, size: 18, color: Colors.red), SizedBox(width: 8), Text("Delete", style: TextStyle(color: Colors.red))],
+            children: [
+              Icon(Icons.delete_outline, size: 18, color: Colors.red),
+              SizedBox(width: 8),
+              Text("Delete", style: TextStyle(color: Colors.red))
+            ],
           ),
         ),
       ],
@@ -283,7 +374,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
             children: [
               Text(item.storeName, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
-              Text("Archived on ${item.date.toString().split(' ')[0]}"),
+              Text("Archived on ${item.date.month}/${item.date.day}/${item.date.year}"),
               const Divider(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -308,7 +399,10 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.black, padding: const EdgeInsets.symmetric(vertical: 14)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Close File Review", style: TextStyle(color: Colors.white)),
               )
