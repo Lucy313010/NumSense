@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../cart_manager.dart';
-import '../scan_purpose.dart';
-import '../receipt_parser.dart';
+import 'cart_manager.dart';
+import 'compare_manager.dart';
+import 'receipt_parser.dart';
+import 'scan_purpose.dart';
 
 class ConfirmTextScreen extends StatefulWidget {
   final File imageFile;
@@ -27,6 +28,12 @@ class ConfirmTextScreen extends StatefulWidget {
 class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _priceController;
+  late final TextEditingController _sizeController;
+  late String _sizeUnit;
+
+  bool get _isCompare => widget.purpose == ScanPurpose.comparePrice;
+
+  String _fmt(double v) => v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toString();
 
   @override
   void initState() {
@@ -35,53 +42,63 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
     _priceController = TextEditingController(
       text: widget.initialPrice != null ? widget.initialPrice!.toStringAsFixed(2) : "",
     );
+    final size = ReceiptParser.parseSize(widget.rawText);
+    _sizeController = TextEditingController(text: size != null ? _fmt(size.amount) : "");
+    _sizeUnit = size?.unit ?? 'oz';
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
+    _sizeController.dispose();
     super.dispose();
   }
 
+  void _popBackTo(String routeName) {
+    Navigator.of(context).popUntil(
+      (route) => route.settings.name == routeName || route.isFirst,
+    );
+  }
+
   void _confirm() {
+    final name = _nameController.text.trim();
     final price = double.tryParse(_priceController.text.trim());
-    if (price == null || _nameController.text.trim().isEmpty) {
+    if (price == null || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Enter a valid item name and price")),
       );
       return;
     }
 
-    if (widget.purpose == ScanPurpose.addToCart) {
-      CartManager.instance.addItem(
-        CartItem(name: _nameController.text.trim(), price: price),
-      );
-      Navigator.of(context).popUntil(ModalRoute.withName('/activeList'));
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Scanned Result"),
-          content: Text("${_nameController.text.trim()}\n\$${price.toStringAsFixed(2)}"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).popUntil(ModalRoute.withName('/home')),
-              child: const Text("Done"),
-            ),
-          ],
-        ),
-      );
+    if (!_isCompare) {
+      CartManager.instance.addItem(CartItem(name: name, price: price));
+      _popBackTo('/activeList');
+      return;
     }
+
+    final sizeAmount = double.tryParse(_sizeController.text.trim());
+    final double? sizeOz = (sizeAmount != null && sizeAmount > 0)
+        ? ReceiptParser.toOunces(sizeAmount, _sizeUnit)
+        : null;
+
+    CompareManager.instance.add(
+      CompareEntry(
+        name: name,
+        price: price,
+        sizeOz: sizeOz,
+        sizeLabel: sizeOz != null ? '${_fmt(sizeAmount!)} $_sizeUnit' : null,
+      ),
+    );
+    _popBackTo('/compare');
   }
 
   @override
   Widget build(BuildContext context) {
-    // call the new parser method to clean up the raw data
     final cleanRawText = ReceiptParser.formatRawTextForUI(widget.rawText);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Confirm Details")),
+      appBar: AppBar(title: Text(_isCompare ? "Confirm Item" : "Confirm Details")),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: ListView(
@@ -98,10 +115,7 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: "Item Name",
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: "Item Name", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -113,6 +127,39 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            if (_isCompare) ...[
+              const SizedBox(height: 16),
+              const Text(
+                "Size (optional) — lets us compare price per ounce",
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _sizeController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(labelText: "Amount", border: OutlineInputBorder()),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _sizeUnit,
+                      decoration: const InputDecoration(labelText: "Unit", border: OutlineInputBorder()),
+                      items: ReceiptParser.sizeUnits
+                          .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) setState(() => _sizeUnit = value);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 24),
             ExpansionTile(
               title: const Text("Raw scanned text"),
@@ -129,11 +176,7 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
                     ),
                     child: Text(
                       cleanRawText.isEmpty ? "No text detected" : cleanRawText,
-                      style: const TextStyle(
-                        fontSize: 14, 
-                        color: Colors.black87,
-                        height: 1.5,
-                      ),
+                      style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
                     ),
                   ),
                 ),
@@ -143,9 +186,7 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
               onPressed: _confirm,
-              child: Text(
-                widget.purpose == ScanPurpose.addToCart ? "Add to Cart" : "Show Result",
-              ),
+              child: Text(_isCompare ? "Add to Comparison" : "Add to Cart"),
             ),
           ],
         ),

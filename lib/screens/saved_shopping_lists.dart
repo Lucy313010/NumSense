@@ -1,25 +1,6 @@
 import 'package:flutter/material.dart';
 import 'active_shopping_list_screen.dart';
-
-class SavedShoppingList {
-  final String id;
-  final String storeName;
-  final DateTime date;
-  final double totalSpent;
-  final double budget;
-  final int itemCount;
-  final String dealIndicator; 
-
-  SavedShoppingList({
-    required this.id,
-    required this.storeName,
-    required this.date,
-    required this.totalSpent,
-    required this.budget,
-    required this.itemCount,
-    required this.dealIndicator,
-  });
-}
+import 'trip_history_manager.dart';
 
 class MasterShoppingListsScreen extends StatefulWidget {
   const MasterShoppingListsScreen({super.key});
@@ -29,35 +10,21 @@ class MasterShoppingListsScreen extends StatefulWidget {
 }
 
 class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
-  final List<SavedShoppingList> _mockSavedLists = [
-    SavedShoppingList(
-      id: '1',
-      storeName: "Trader Joe's",
-      date: DateTime(2026, 8, 20),
-      totalSpent: 42.50,
-      budget: 50.00,
-      itemCount: 8,
-      dealIndicator: 'Great Deals',
-    ),
-    SavedShoppingList(
-      id: '2',
-      storeName: 'Walmart',
-      date: DateTime(2026, 8, 15),
-      totalSpent: 68.10,
-      budget: 60.00,
-      itemCount: 12,
-      dealIndicator: 'Standard Prices',
-    ),
-    SavedShoppingList(
-      id: '3',
-      storeName: 'Whole Foods',
-      date: DateTime(2026, 8, 02),
-      totalSpent: 92.00,
-      budget: 80.00,
-      itemCount: 6,
-      dealIndicator: 'High Prices',
-    ),
-  ];
+    List<SavedShoppingList> get _mockSavedLists => TripHistoryManager.instance.trips.value;
+
+  @override
+  void initState() {
+    super.initState();
+    TripHistoryManager.instance.trips.addListener(_onTripsChanged);
+  }
+
+  @override
+  void dispose() {
+    TripHistoryManager.instance.trips.removeListener(_onTripsChanged);
+    super.dispose();
+  }
+
+  void _onTripsChanged() => setState(() {});
 
   String _searchQuery = "";
   bool _isGridView = true;
@@ -147,7 +114,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
             context,
             MaterialPageRoute(
               settings: const RouteSettings(name: '/activeList'),
-              builder: (context) => const ActiveShoppingListScreen(initialBudget: 50),
+              builder: (context) => const ActiveShoppingListScreen(),
             ),
           );
         },
@@ -318,12 +285,12 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
       icon: const Icon(Icons.more_vert, size: 20, color: Colors.grey),
       padding: EdgeInsets.zero,
       onSelected: (value) {
-        if (value == 'delete') {
-          setState(() {
-            _mockSavedLists.removeWhere((element) => element.id == item.id);
-          });
+        if (value == 'open') {
+          _openSavedListDetails(item);
+        } else if (value == 'delete') {
+          TripHistoryManager.instance.removeTrip(item.id);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Deleted ${item.storeName} list from cloud memory.")),
+            SnackBar(content: Text("Deleted ${item.storeName} trip.")),
           );
         }
       },
@@ -355,8 +322,14 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
         children: [
           Icon(Icons.cloud_queue, size: 64, color: Colors.grey[300]),
           const SizedBox(height: 12),
-          Text("No shopping files found", style: TextStyle(color: Colors.grey[600], fontSize: 16)),
-          Text("Try expanding your search parameters.", style: TextStyle(color: Colors.grey[400], fontSize: 13)),
+          Text(
+            _searchQuery.isEmpty ? "No trips yet" : "No shopping files found",
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+          Text(
+            _searchQuery.isEmpty ? "Finish a shopping trip and it will show up here." : "Try a different search.",
+            style: TextStyle(color: Colors.grey[400], fontSize: 13),
+          ),
         ],
       ),
     );

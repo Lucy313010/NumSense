@@ -109,11 +109,26 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
     CartManager.instance.addItem(
       CartItem(name: name, price: pricePerUnit * weight),
     );
-    Navigator.of(context).popUntil(ModalRoute.withName('/activeList'));
+    Navigator.of(context).popUntil(
+      (route) => route.settings.name == '/activeList' || route.isFirst,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    return PopScope(
+      canPop: _step == _WeightStep.priceTag,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        setState(() {
+          _step = _step == _WeightStep.confirm ? _WeightStep.scaleWeight : _WeightStep.priceTag;
+        });
+      },
+      child: _buildCurrentStep(),
+    );
+  }
+
+  Widget _buildCurrentStep() {
     switch (_step) {
       case _WeightStep.priceTag:
         return _buildCaptureStep(

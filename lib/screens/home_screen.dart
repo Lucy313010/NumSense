@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'saved_shopping_lists.dart';
 import 'active_shopping_list_screen.dart';
-import 'shopping_camera_screen.dart';
+import 'compare_items_screen.dart';
+import 'compare_manager.dart';
 import 'login_screen.dart';
 import 'community_map_screen.dart';
-import 'scan_purpose.dart';
-import 'budget_manager.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,9 +40,7 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
                       );
                     },
                     child: const Text("Sign Up"),
@@ -60,17 +57,14 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                      ),
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
                       onPressed: () {
+                        CompareManager.instance.clear();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ShoppingCameraScreen(
-                              captureType: 'item',
-                              purpose: ScanPurpose.comparePrice,
-                            ),
+                            settings: const RouteSettings(name: '/compare'),
+                            builder: (context) => const CompareItemsScreen(),
                           ),
                         );
                       },
@@ -82,51 +76,33 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                      ),
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const MasterShoppingListsScreen()),
                         );
                       },
-                      child: const Text(
-                        "Past Shopping Items",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: const Text("Past Shopping Items", style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                      ),
+                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            // ---------------------------------------------------------
-                            // FIX: Added the '/activeList' route tag to the correct screen!
-                            // ---------------------------------------------------------
                             settings: const RouteSettings(name: '/activeList'),
-                            builder: (context) => ActiveShoppingListScreen(
-                              initialBudget: BudgetManager.instance.currentBudget,
-                            ),
+                            builder: (context) => const ActiveShoppingListScreen(),
                           ),
                         );
                       },
-                      child: const Text(
-                        "Start Shopping",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: const Text("Start Shopping", style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.map_outlined),
-                      label: const Text(
-                        "Community Safe Map",
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      label: const Text("Community Safe Map", style: TextStyle(fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         backgroundColor: Colors.black87,
@@ -135,10 +111,7 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            // FIX: Removed the incorrect activeList tag from here!
-                            builder: (context) => const CommunityMapScreen(),
-                          ),
+                          MaterialPageRoute(builder: (context) => const CommunityMapScreen()),
                         );
                       },
                     ),

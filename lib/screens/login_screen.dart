@@ -23,11 +23,86 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleEmailLogin() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Processing Email Login...')),
+  String _authMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-credential':
+      case 'wrong-password':
+      case 'user-not-found':
+        return 'Email or password is incorrect.';
+      case 'email-already-in-use':
+      case 'credential-already-in-use':
+        return 'An account with this email already exists. Try signing in instead.';
+      case 'weak-password':
+        return 'Password is too weak — use at least 6 characters.';
+      case 'invalid-email':
+        return "That email address doesn't look right.";
+      case 'network-request-failed':
+        return 'No internet connection. Please try again.';
+      default:
+        return e.message ?? 'Something went wrong. Please try again.';
+    }
+  }
+
+  void _goToWelcome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+    );
+  }
+
+  Future<void> _handleEmailLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
+      if (mounted) _goToWelcome();
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_authMessage(e))),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleCreateAccount() async {
+    if (!_formKey.currentState!.validate()) return;
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    try {
+      final current = FirebaseAuth.instance.currentUser;
+      if (current != null && current.isAnonymous) {
+        await current.linkWithCredential(
+          EmailAuthProvider.credential(email: email, password: password),
+        );
+      } else {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email, 
+          password: password,
+        );
+      }
+      if (mounted) _goToWelcome();
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_authMessage(e))),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleGuestLogin() async {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      if (mounted) _goToWelcome();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing in as guest: $e')),
+        );
+      }
     }
   }
 
@@ -53,9 +128,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // 4. Securely sign in to firebase with the credential
       UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      
-      // can access user data safely via userCredential.user
-      // examples: userCredential.user?.email, userCredential.user?.displayName
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -63,10 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         // 5. navigate to app's main flow
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        );
+        _goToWelcome();
       }
     } catch (e) {
       if (mounted) {
@@ -74,23 +143,6 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(content: Text('Google Sign-In Error: $e')),
         );
       }
-    }
-  }
-
-  void _handleGuestLogin() async {
-    try {
-      await FirebaseAuth.instance.signInAnonymously();
-      
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error signing in as guest: $e')),
-      );
     }
   }
 
@@ -195,6 +247,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Sign In',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: _handleCreateAccount,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(height: 20),
 

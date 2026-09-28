@@ -4,8 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'home_screen.dart';
 
 class EmojiRatingScreen extends StatefulWidget {
-  final double initialBudget;
-  const EmojiRatingScreen({super.key, required this.initialBudget});
+  const EmojiRatingScreen({super.key});
 
   @override
   State<EmojiRatingScreen> createState() => _EmojiRatingScreenState();
@@ -13,6 +12,17 @@ class EmojiRatingScreen extends StatefulWidget {
 
 class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
   bool _isSubmitting = false;
+
+  void _goHome() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/home'),
+        builder: (context) => const HomeScreen(),
+      ),
+      (route) => false,
+    );
+  }
 
   Future<void> _submitRating(int ratingScore) async {
     setState(() => _isSubmitting = true);
@@ -45,11 +55,7 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
           const SnackBar(content: Text('Thanks for helping the community! 🩵')),
         );
         
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false,
-        );
+        _goHome();
       }
     } catch (e) {
       if (mounted) {
@@ -113,6 +119,11 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
                       emoji: "🔴",
                       title: "Confusing math, high stress",
                       onPressed: () => _submitRating(3),
+                    ),
+                    const SizedBox(height: 24),
+                    TextButton(
+                      onPressed: _goHome,
+                      child: const Text("Skip for now", style: TextStyle(fontSize: 16)),
                     ),
                   ],
                 ),

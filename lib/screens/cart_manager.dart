@@ -29,6 +29,13 @@ class CartManager {
     BudgetManager.instance.setBudget(BudgetManager.instance.currentBudget + removed.price);
   }
 
+  double checkout() {
+    final spent = totalSpent;
+    items.value = [];
+    BudgetManager.instance.setBudget(BudgetManager.instance.currentBudget + spent);
+    return spent;
+  }
+
   void clear() {
     items.value = [];
   }

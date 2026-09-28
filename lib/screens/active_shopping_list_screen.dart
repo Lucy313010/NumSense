@@ -3,21 +3,73 @@ import 'add_item_options_screen.dart';
 import 'budget_manager.dart';
 import 'cart_manager.dart';
 import 'emoji_rating_screen.dart';
+import 'trip_history_manager.dart';
 
 class ActiveShoppingListScreen extends StatelessWidget {
-  final double? initialBudget;
-  final String? storeName;
-
-  const ActiveShoppingListScreen({
-    super.key,
-    this.initialBudget,
-    this.storeName,
-  });
+  const ActiveShoppingListScreen({super.key});
 
   Color _getSliderColor(double value) {
     if (value < 60) return Colors.blueAccent;
     if (value < 140) return Colors.orangeAccent;
     return Colors.redAccent;
+  }
+
+  Future<void> _finishCheckout(BuildContext context) async {
+    final cartItems = CartManager.instance.items.value;
+    if (cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Your cart is empty — add an item first.")),
+      );
+      return;
+    }
+
+    final storeController = TextEditingController();
+    final storeName = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Where did you shop?"),
+        content: TextField(
+          controller: storeController,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(hintText: "Store name", border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, storeController.text.trim()),
+            child: const Text("Save Trip"),
+          ),
+        ],
+      ),
+    );
+
+    if (storeName == null || !context.mounted) return;
+
+    final spent = CartManager.instance.totalSpent;
+    final startingBudget = BudgetManager.instance.currentBudget + spent;
+
+    TripHistoryManager.instance.addTrip(
+      SavedShoppingList(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        storeName: storeName.isEmpty ? "Unnamed Store" : storeName,
+        date: DateTime.now(),
+        totalSpent: spent,
+        budget: startingBudget,
+        itemCount: cartItems.length,
+        dealIndicator: TripHistoryManager.dealLabel(spent, startingBudget),
+      ),
+    );
+
+    CartManager.instance.checkout();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EmojiRatingScreen()),
+    );
   }
 
   @override
@@ -142,15 +194,7 @@ class ActiveShoppingListScreen extends StatelessWidget {
                         foregroundColor: Colors.green,
                         side: const BorderSide(color: Colors.green, width: 2),
                       ),
-                      onPressed: () {
-                        CartManager.instance.clear();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EmojiRatingScreen(initialBudget: 50.0),
-                          ),
-                        );
-                      },
+                      onPressed: () => _finishCheckout(context),
                     ),
                   ],
                 ),
