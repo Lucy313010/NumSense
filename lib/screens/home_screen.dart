@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'saved_shopping_lists.dart'; 
+import 'saved_shopping_lists.dart';
 import 'active_shopping_list_screen.dart';
 import 'shopping_camera_screen.dart';
 import 'login_screen.dart';
@@ -105,6 +105,10 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
+                            // ---------------------------------------------------------
+                            // FIX: Added the '/activeList' route tag to the correct screen!
+                            // ---------------------------------------------------------
+                            settings: const RouteSettings(name: '/activeList'),
                             builder: (context) => ActiveShoppingListScreen(
                               initialBudget: BudgetManager.instance.currentBudget,
                             ),
@@ -132,7 +136,7 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            settings: const RouteSettings(name: '/activeList'),
+                            // FIX: Removed the incorrect activeList tag from here!
                             builder: (context) => const CommunityMapScreen(),
                           ),
                         );

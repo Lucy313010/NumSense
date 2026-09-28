@@ -8,7 +8,7 @@ class SavedShoppingList {
   final double totalSpent;
   final double budget;
   final int itemCount;
-  final String dealIndicator; // added from old past shopping screen
+  final String dealIndicator; 
 
   SavedShoppingList({
     required this.id,
@@ -137,7 +137,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+ floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
@@ -146,6 +146,7 @@ class _MasterShoppingListsScreenState extends State<MasterShoppingListsScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
+              settings: const RouteSettings(name: '/activeList'),
               builder: (context) => const ActiveShoppingListScreen(initialBudget: 50),
             ),
           );

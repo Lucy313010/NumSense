@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'cart_manager.dart';
-import 'scan_purpose.dart';
+import '../cart_manager.dart';
+import '../scan_purpose.dart';
+import '../receipt_parser.dart';
 
 class ConfirmTextScreen extends StatefulWidget {
   final File imageFile;
@@ -76,6 +77,9 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // call the new parser method to clean up the raw data
+    final cleanRawText = ReceiptParser.formatRawTextForUI(widget.rawText);
+
     return Scaffold(
       appBar: AppBar(title: const Text("Confirm Details")),
       body: Padding(
@@ -115,9 +119,22 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    widget.rawText.isEmpty ? "No text detected" : widget.rawText,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Text(
+                      cleanRawText.isEmpty ? "No text detected" : cleanRawText,
+                      style: const TextStyle(
+                        fontSize: 14, 
+                        color: Colors.black87,
+                        height: 1.5,
+                      ),
+                    ),
                   ),
                 ),
               ],
