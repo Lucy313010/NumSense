@@ -20,16 +20,28 @@ class ReceiptParser {
 
     double? foundPrice;
 
-    final explicitPriceRegExp = RegExp(r'[\$S]\s?(\d{1,4})[., ]?(\d{2})\b');
+    final explicitPriceRegExp = RegExp(r'[\$S]\s?(\d{1,4})(?:[., ](\d{1,2}))?\b');
     final explicitMatch = explicitPriceRegExp.firstMatch(cleanText);
 
     if (explicitMatch != null) {
-      foundPrice = double.tryParse("${explicitMatch.group(1)}.${explicitMatch.group(2)}");
+      String decimalPart = explicitMatch.group(2) ?? "00";
+      if (decimalPart.length == 1) decimalPart += "0";
+      foundPrice = double.tryParse("${explicitMatch.group(1)}.$decimalPart");
     } else {
-      final decimalRegExp = RegExp(r'\b(\d{1,4})[.,](\d{2})\b');
+
+      final decimalRegExp = RegExp(r'\b(\d{1,4})[.,](\d{1,2})\b');
       final decimalMatch = decimalRegExp.firstMatch(cleanText);
       if (decimalMatch != null) {
-        foundPrice = double.tryParse("${decimalMatch.group(1)}.${decimalMatch.group(2)}");
+        String decimalPart = decimalMatch.group(2)!;
+        if (decimalPart.length == 1) decimalPart += "0";
+        foundPrice = double.tryParse("${decimalMatch.group(1)}.$decimalPart");
+      } else {
+       
+        final standaloneNumRegExp = RegExp(r'\b(\d{1,4})\b');
+        final matches = standaloneNumRegExp.allMatches(cleanText);
+        if (matches.isNotEmpty) {
+           foundPrice = double.tryParse(matches.last.group(1)!);
+        }
       }
     }
 
@@ -43,11 +55,21 @@ class ReceiptParser {
         caseSensitive: false,
       ).hasMatch(line);
 
-      if (!isJustNumber && !isStopWord && line.length > 3) {
-        nameGuess = line.replaceAll(RegExp(r'[^a-zA-Z0-9\s\-\%]'), '').trim();
-        break;
+      if (!isJustNumber && !isStopWord && line.length >= 2) {
+       
+        nameGuess = line.replaceAll(RegExp(r'[^a-zA-Z\s\-\%]'), '').trim();
+        
+
+        nameGuess = nameGuess.replaceAll(RegExp(r'\s+[sS]{1,2}$'), '').trim();
+
+        if (nameGuess.isNotEmpty && nameGuess.length >= 2) {
+          break;
+        }
       }
     }
+
+
+    if (nameGuess.isEmpty) nameGuess = "Scanned Item";
 
     return ParsedReceipt(itemName: nameGuess, price: foundPrice);
   }
