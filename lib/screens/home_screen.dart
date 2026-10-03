@@ -80,7 +80,7 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const MasterShoppingListsScreen()),
+                          MaterialPageRoute(builder: (context) =>  SavedShoppingListsScreen()),
                         );
                       },
                       child: const Text("Past Shopping Items", style: TextStyle(fontSize: 18)),

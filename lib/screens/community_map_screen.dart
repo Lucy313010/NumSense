@@ -1,234 +1,143 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CommunityMapScreen extends StatefulWidget {
-  const CommunityMapScreen({super.key});
+  const CommunityMapScreen({Key? key}) : super(key: key);
 
   @override
   State<CommunityMapScreen> createState() => _CommunityMapScreenState();
 }
 
 class _CommunityMapScreenState extends State<CommunityMapScreen> {
-  LatLng? _currentLocation;
-  bool _isLoadingLocation = true;
-  String _locationError = '';
-  final MapController _mapController = MapController();
+  GoogleMapController? mapController;
+  Position? _currentPosition;
+  Set<Marker> _markers = {};
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
+    _initializeMapData();
   }
 
-  Future<void> _getUserLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _locationError = "Location permission denied.";
-            _isLoadingLocation = false;
-          });
-          return;
-        }
-      }
+  Future<void> _initializeMapData() async {
+    await _determinePosition();
+    await _loadCommunityLocations();
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _locationError = "Location permissions are permanently denied.";
-          _isLoadingLocation = false;
-        });
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      debugPrint('Location services are disabled.');
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        debugPrint('Location permissions are denied');
         return;
       }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      debugPrint('Location permissions are permanently denied.');
+      return;
+    } 
 
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      _currentPosition = position;
+    });
+    
+  
+    if (mapController != null && _currentPosition != null) {
+      mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+            zoom: 14.0,
+          ),
+        ),
       );
-
-      if (mounted) {
-        setState(() {
-          _currentLocation = LatLng(position.latitude, position.longitude);
-          _isLoadingLocation = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _locationError = "Error getting location: $e";
-          _isLoadingLocation = false;
-        });
-      }
     }
   }
 
-  void _centerOnUser() {
-    if (_currentLocation != null) {
-      _mapController.move(_currentLocation!, 14.0);
+  Future<void> _loadCommunityLocations() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('community_locations').get();
+      final Set<Marker> fetchedMarkers = {};
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final double lat = data['latitude'] ?? 0.0;
+        final double lng = data['longitude'] ?? 0.0;
+        final String name = data['name'] ?? 'Unknown Location';
+        final String desc = data['description'] ?? '';
+
+        fetchedMarkers.add(
+          Marker(
+            markerId: MarkerId(doc.id),
+            position: LatLng(lat, lng),
+            infoWindow: InfoWindow(
+              title: name,
+              snippet: desc,
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          ),
+        );
+      }
+
+      setState(() {
+        _markers = fetchedMarkers;
+      });
+    } catch (e) {
+      debugPrint("Error loading map markers: $e");
     }
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Default fallback coordinate if location isn't fetched yet
+    final initialTarget = _currentPosition != null 
+        ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+        : const LatLng(37.7749, -122.4194); // Fallback: San Francisco
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cognitive Comfort Map"),
-        centerTitle: true,
+        title: const Text('Community Safe Map'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.my_location),
+            onPressed: _determinePosition,
+          )
+        ],
       ),
-      body: _isLoadingLocation
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text("Finding your location..."),
-                ],
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator())
+          : GoogleMap(
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(
+                target: initialTarget,
+                zoom: 14.0,
               ),
-            )
-          : _locationError.isNotEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Text(
-                      _locationError,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red, fontSize: 16),
-                    ),
-                  ),
-                )
-              : Stack(
-                  children: [
-
-                    StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('cognitive_ratings')
-                          .snapshots(),
-                      builder: (context, snapshot) {
-
-                        List<Marker> allMarkers = [];
-
-
-                        if (_currentLocation != null) {
-                          allMarkers.add(
-                            Marker(
-                              point: _currentLocation!,
-                              width: 60,
-                              height: 60,
-                              child: const Column(
-                                children: [
-                                  Icon(Icons.person_pin_circle, color: Colors.blue, size: 40),
-                                  Text("You", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-
-         
-                        if (snapshot.hasData) {
-                          final storeMarkers = snapshot.data!.docs.map((doc) {
-                            final data = doc.data() as Map<String, dynamic>;
-                            final lat = data['latitude'] as double;
-                            final lng = data['longitude'] as double;
-                            final rating = data['rating'] as int; 
-
-                            Color markerColor = Colors.grey;
-                            if (rating == 1) markerColor = Colors.green;
-                            if (rating == 2) markerColor = Colors.orangeAccent;
-                            if (rating == 3) markerColor = Colors.redAccent;
-
-                            return Marker(
-                              point: LatLng(lat, lng),
-                              width: 40,
-                              height: 40,
-                              child: GestureDetector(
-                                onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Store Rating: ${rating == 1 ? "Calm & Clear" : rating == 2 ? "Moderate" : "Overwhelming"}')),
-                                  );
-                                },
-                                child: Icon(Icons.location_on, color: markerColor, size: 40),
-                              ),
-                            );
-                          }).toList();
-                          
-                          allMarkers.addAll(storeMarkers);
-                        }
-
-                        return FlutterMap(
-                          mapController: _mapController,
-                          options: MapOptions(
-                            initialCenter: _currentLocation ?? const LatLng(0, 0),
-                            initialZoom: 14.0, 
-                          ),
-                          children: [
-                            TileLayer(
-                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.dyscalculia.numsense',
-                            ),
-                            MarkerLayer(markers: allMarkers),
-                          ],
-                        );
-                      },
-                    ),
-
-                    Positioned(
-                      bottom: 30,
-                      left: 20,
-                      right: 20,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.95),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2)
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _LegendItem(color: Colors.green, label: "Calm"),
-                            _LegendItem(color: Colors.orangeAccent, label: "Moderate"),
-                            _LegendItem(color: Colors.redAccent, label: "Busy"),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-      floatingActionButton: _isLoadingLocation || _locationError.isNotEmpty
-          ? null
-          : FloatingActionButton(
-              backgroundColor: Colors.blueAccent,
-              foregroundColor: Colors.white,
-              onPressed: _centerOnUser,
-              child: const Icon(Icons.my_location),
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false, 
+              markers: _markers,
             ),
-    );
-  }
-}
-
-
-class _LegendItem extends StatelessWidget {
-  final Color color;
-  final String label;
-
-  const _LegendItem({required this.color, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(Icons.location_on, color: color, size: 24),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
     );
   }
 }
