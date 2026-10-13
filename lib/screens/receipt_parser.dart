@@ -16,60 +16,69 @@ class ReceiptParser {
   static const List<String> sizeUnits = ['oz', 'lb', 'g', 'kg', 'ml', 'l'];
 
   static ParsedReceipt parse(String rawText) {
-    final cleanText = rawText.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final lines = rawText
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
 
     double? foundPrice;
-
-    final explicitPriceRegExp = RegExp(r'[\$S]\s?(\d{1,4})(?:[., ](\d{1,2}))?\b');
-    final explicitMatch = explicitPriceRegExp.firstMatch(cleanText);
-
-    if (explicitMatch != null) {
-      String decimalPart = explicitMatch.group(2) ?? "00";
-      if (decimalPart.length == 1) decimalPart += "0";
-      foundPrice = double.tryParse("${explicitMatch.group(1)}.$decimalPart");
-    } else {
-
-      final decimalRegExp = RegExp(r'\b(\d{1,4})[.,](\d{1,2})\b');
-      final decimalMatch = decimalRegExp.firstMatch(cleanText);
-      if (decimalMatch != null) {
-        String decimalPart = decimalMatch.group(2)!;
-        if (decimalPart.length == 1) decimalPart += "0";
-        foundPrice = double.tryParse("${decimalMatch.group(1)}.$decimalPart");
-      } else {
-       
-        final standaloneNumRegExp = RegExp(r'\b(\d{1,4})\b');
-        final matches = standaloneNumRegExp.allMatches(cleanText);
-        if (matches.isNotEmpty) {
-           foundPrice = double.tryParse(matches.last.group(1)!);
-        }
-      }
-    }
-
-    final lines = rawText.split('\n').map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
     String nameGuess = "Scanned Item";
 
+    // 1. Identify Item Name (Skip promo titles, prices, and system codes)
+    final ignoreKeywords = RegExp(
+      r'\b(retail|price|unit|was|dropped|everyday|low|save|special|rollback|fac|cap|srp|per|each|oz|lb)\b',
+      caseSensitive: false,
+    );
+
     for (final line in lines) {
-      final isJustNumber = RegExp(r'^[\d\.\$\sS]+$').hasMatch(line);
-      final isStopWord = RegExp(
-        r'\b(total|tax|cash|change|visa|mastercard|subtotal|unt|unit|per|oz)\b',
-        caseSensitive: false,
-      ).hasMatch(line);
+      final isPureNumbers = RegExp(r'^[\d\.\$\sS\-/,]+$').hasMatch(line);
+      final hasIgnoreWord = ignoreKeywords.hasMatch(line);
 
-      if (!isJustNumber && !isStopWord && line.length >= 2) {
-       
-        nameGuess = line.replaceAll(RegExp(r'[^a-zA-Z\s\-\%]'), '').trim();
-        
+      if (!isPureNumbers && !hasIgnoreWord && line.length >= 3) {
+        String cleanLine = line
+            .replaceAll(RegExp(r'[^a-zA-Z0-9\s\-\%]'), '')
+            .replaceAll(RegExp(r'\s+[sS]{1,2}$'), '')
+            .trim();
 
-        nameGuess = nameGuess.replaceAll(RegExp(r'\s+[sS]{1,2}$'), '').trim();
-
-        if (nameGuess.isNotEmpty && nameGuess.length >= 2) {
+        if (cleanLine.length >= 3) {
+          nameGuess = cleanLine;
           break;
         }
       }
     }
 
+    // 2. Identify Price
+    // Regex matches explicit prices with decimals like $4.98 or $32.99
+    final decimalPriceRegExp = RegExp(r'[\$S]?\s?(\d{1,3})[\.,](\d{2})\b');
+    
+    for (final line in lines) {
+      // Prioritize explicit price lines
+      final match = decimalPriceRegExp.firstMatch(line);
+      if (match != null) {
+        final dollars = match.group(1)!;
+        final cents = match.group(2)!;
+        final candidate = double.tryParse("$dollars.$cents");
+        
+        // Exclude unit prices per oz/lb if main price exists
+        if (candidate != null && candidate > 0 && candidate < 500) {
+          foundPrice = candidate;
+          break;
+        }
+      }
+    }
 
-    if (nameGuess.isEmpty) nameGuess = "Scanned Item";
+    // Fallback: If price came in as $498 without decimal, convert to 4.98 if > 99
+    if (foundPrice == null) {
+      final wholeDollarRegExp = RegExp(r'[\$S]\s?(\d{3,4})\b');
+      final match = wholeDollarRegExp.firstMatch(rawText);
+      if (match != null) {
+        final val = double.tryParse(match.group(1)!);
+        if (val != null) {
+          foundPrice = val / 100.0; // 498 -> 4.98
+        }
+      }
+    }
 
     return ParsedReceipt(itemName: nameGuess, price: foundPrice);
   }

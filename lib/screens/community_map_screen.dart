@@ -25,42 +25,112 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
   Future<void> _initializeMapData() async {
     await _determinePosition();
     await _loadCommunityLocations();
-    setState(() {
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      debugPrint('Location services are disabled.');
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        debugPrint('Location permissions are denied');
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please enable device location services.')),
+          );
+        }
         return;
       }
-    }
-    
-    if (permission == LocationPermission.deniedForever) {
-      debugPrint('Location permissions are permanently denied.');
-      return;
-    } 
 
-    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    setState(() {
-      _currentPosition = position;
-    });
-    
-  
-    if (mapController != null && _currentPosition != null) {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permissions were denied.')),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are permanently denied in device settings.')),
+          );
+        }
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+        });
+      }
+
+      if (mapController != null && _currentPosition != null) {
+        mapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
+              zoom: 14.0,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error fetching location: $e");
+    }
+  }
+
+  Future<void> _loadCommunityLocations() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('community_locations').get();
+      final Set<Marker> fetchedMarkers = {};
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final double lat = (data['latitude'] as num?)?.toDouble() ?? 0.0;
+        final double lng = (data['longitude'] as num?)?.toDouble() ?? 0.0;
+        final String name = data['name'] ?? 'Unknown Location';
+        final String desc = data['description'] ?? '';
+
+        if (lat != 0.0 && lng != 0.0) {
+          fetchedMarkers.add(
+            Marker(
+              markerId: MarkerId(doc.id),
+              position: LatLng(lat, lng),
+              infoWindow: InfoWindow(
+                title: name,
+                snippet: desc,
+              ),
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+            ),
+          );
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _markers = fetchedMarkers;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading map markers: $e");
+    }
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+    if (_currentPosition != null) {
       mapController!.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -72,49 +142,11 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
     }
   }
 
-  Future<void> _loadCommunityLocations() async {
-    try {
-      final snapshot = await FirebaseFirestore.instance.collection('community_locations').get();
-      final Set<Marker> fetchedMarkers = {};
-
-      for (var doc in snapshot.docs) {
-        final data = doc.data();
-        final double lat = data['latitude'] ?? 0.0;
-        final double lng = data['longitude'] ?? 0.0;
-        final String name = data['name'] ?? 'Unknown Location';
-        final String desc = data['description'] ?? '';
-
-        fetchedMarkers.add(
-          Marker(
-            markerId: MarkerId(doc.id),
-            position: LatLng(lat, lng),
-            infoWindow: InfoWindow(
-              title: name,
-              snippet: desc,
-            ),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-          ),
-        );
-      }
-
-      setState(() {
-        _markers = fetchedMarkers;
-      });
-    } catch (e) {
-      debugPrint("Error loading map markers: $e");
-    }
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Default fallback coordinate if location isn't fetched yet
-    final initialTarget = _currentPosition != null 
+    final initialTarget = _currentPosition != null
         ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-        : const LatLng(37.7749, -122.4194); // Fallback: San Francisco
+        : const LatLng(37.7749, -122.4194); // Default fallback
 
     return Scaffold(
       appBar: AppBar(
@@ -126,7 +158,7 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
           )
         ],
       ),
-      body: _isLoading 
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(
               onMapCreated: _onMapCreated,
@@ -134,8 +166,8 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
                 target: initialTarget,
                 zoom: 14.0,
               ),
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false, 
+              myLocationEnabled: _currentPosition != null,
+              myLocationButtonEnabled: false,
               markers: _markers,
             ),
     );
