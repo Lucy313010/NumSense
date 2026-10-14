@@ -1,68 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'grocery_export_screen.dart';
-import 'app_drawer.dart';
+import 'trip_history_manager.dart';
+
+class SavedShoppingListsScreen extends StatefulWidget {
+  const SavedShoppingListsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SavedShoppingListsScreen> createState() => _SavedShoppingListsScreenState();
+}
+
 import 'custom_app_bar.dart';
 
-class SavedShoppingListsScreen extends StatelessWidget {
-  const SavedShoppingListsScreen({super.key});
+class _SavedShoppingListsScreenState extends State<SavedShoppingListsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    TripHistoryManager.instance.trips.addListener(_onTripsChanged);
+  }
+
+  @override
+  void dispose() {
+    TripHistoryManager.instance.trips.removeListener(_onTripsChanged);
+    super.dispose();
+  }
+
+  void _onTripsChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
+    final trips = TripHistoryManager.instance.trips.value;
+
     return Scaffold(
       appBar: const CustomAppBar(title: "Saved Shopping Lists"),
-      drawer: const AppDrawer(),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('shopping_lists').orderBy('createdAt', descending: true).snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong loading lists.'));
-          }
+      body: trips.isEmpty
+          ? const Center(child: Text('No saved lists found. Finish a shopping trip to see it here.'))
+          : ListView.builder(
+              itemCount: trips.length,
+              itemBuilder: (context, index) {
+                final trip = trips[index];
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final lists = snapshot.data?.docs ?? [];
-
-          if (lists.isEmpty) {
-            return const Center(child: Text('No saved lists found. Create one!'));
-          }
-
-          return ListView.builder(
-            itemCount: lists.length,
-            itemBuilder: (context, index) {
-              final doc = lists[index];
-              final data = doc.data() as Map<String, dynamic>;
-             
-              final title = data['title'] ?? 'Untitled List';
-              final items = List<String>.from(data['items'] ?? []);
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ExpansionTile(
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    title: Text(trip.storeName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                      "${trip.date.month}/${trip.date.day}/${trip.date.year} · ${trip.itemCount} items",
+                    ),
+                    trailing: Text(
+                      "\$${trip.totalSpent.toStringAsFixed(2)}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: trip.totalSpent > trip.budget ? Colors.red : Colors.green[700],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.ios_share, color: Colors.blueAccent),
-                        onPressed: () => GroceryExportService.downloadAndShareList(title, items),
-                      ),
-                    ],
+                    ),
                   ),
-                  subtitle: Text('${items.length} items'),
-                  children: items.map((item) => ListTile(
-                    leading: const Icon(Icons.check_circle_outline),
-                    title: Text(item),
-                  )).toList(),
-                ),
-              );
-            },
-          );
-        },
-      ),
+                );
+              },
+            ),
     );
   }
 }
