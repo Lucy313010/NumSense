@@ -82,7 +82,11 @@ class ActiveShoppingListScreen extends StatelessWidget {
        dealIndicator: TripHistoryManager.dealLabel(spent, startingBudget),
      ),
    );
-
+     if (context.mounted) {
+     ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(content: Text('Trip saved. Total trips now: ${TripHistoryManager.instance.trips.value.length}')),
+     );
+   }
    CartManager.instance.checkout();
 
    if (context.mounted) {
