@@ -47,6 +47,7 @@ dependencies:
   share_plus: ^13.3.1
   path_provider: ^2.1.6
   http: ^1.6.0
+  image_cropper: ^12.2.1
 
 dev_dependencies:
   flutter_test:
@@ -68,10 +69,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-fonts:
-  - family: OpenDyslexic
-    fonts:
-      - asset: assets/fonts/OpenDyslexic-Regular.otf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -102,3 +100,7 @@ fonts:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  fonts:
+    - family: OpenDyslexic
+      fonts:
+        - asset: assets/fonts/OpenDyslexic-Regular.otf

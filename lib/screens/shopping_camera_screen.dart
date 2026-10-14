@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'app_drawer.dart';
 import 'confirm_text_screen.dart';
 import 'scan_purpose.dart';
 import 'receipt_parser.dart';
+import 'image_crop_helper.dart';
 
 class ShoppingCameraScreen extends StatefulWidget {
   final String captureType;
@@ -31,16 +31,18 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
 
   Future<void> _captureSingleImage() async {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-    if (photo != null) {
-      final file = File(photo.path);
-      setState(() {
-        _capturedImage = file;
-      });
-      await _analyzeImage(file);
-    }
+    if (photo == null) return;
+
+    final croppedFile = await ImageCropHelper.cropForOcr(photo.path);
+    if (croppedFile == null) return;
+
+    setState(() {
+      _capturedImage = croppedFile;
+    });
+    await _analyzeImage(croppedFile);
   }
 
-Future<void> _analyzeImage(File imageFile) async {
+  Future<void> _analyzeImage(File imageFile) async {
     if (_capturedImage == null) return;
 
     setState(() {
@@ -90,7 +92,6 @@ Future<void> _analyzeImage(File imageFile) async {
       appBar: AppBar(
         title: Text("Scan ${widget.captureType}"),
       ),
-      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

@@ -5,6 +5,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'receipt_parser.dart';
 import 'cart_manager.dart';
 import 'app_drawer.dart';
+import 'image_crop_helper.dart';
 
 enum _WeightStep { priceTag, scaleWeight, confirm }
 
@@ -57,20 +58,22 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     if (photo == null) return;
 
-    final file = File(photo.path);
+    final croppedFile = await ImageCropHelper.cropForOcr(photo.path);
+    if (croppedFile == null) return;
+
     setState(() {
       _isAnalyzing = true;
       if (isPriceTag) {
-        _priceTagImage = file;
+        _priceTagImage = croppedFile;
       } else {
-        _scaleImage = file;
+        _scaleImage = croppedFile;
       }
     });
 
     String rawText = "";
     final List<TextLineInfo> lineInfos = [];
     try {
-      final inputImage = InputImage.fromFile(file);
+      final inputImage = InputImage.fromFile(croppedFile);
       final recognizedText = await _textRecognizer.processImage(inputImage);
       rawText = recognizedText.text;
       for (final block in recognizedText.blocks) {
