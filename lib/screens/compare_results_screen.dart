@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'active_shopping_list_screen.dart';
 import 'cart_manager.dart';
 import 'compare_manager.dart';
-
+import 'app_drawer.dart';
 class CompareResultsScreen extends StatelessWidget {
   const CompareResultsScreen({super.key});
 
@@ -32,6 +32,7 @@ class CompareResultsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Best Deal")),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

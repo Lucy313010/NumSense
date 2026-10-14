@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-
+import 'app_drawer.dart';
 class CompareEntry {
   final String name;
   final double price;

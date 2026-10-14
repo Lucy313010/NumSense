@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'budget_setup_screen.dart';
-
+import 'app_drawer.dart';
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -44,6 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      drawer: const AppDrawer(),
       body: Center(
         child: AnimatedOpacity(
           opacity: _opacity,

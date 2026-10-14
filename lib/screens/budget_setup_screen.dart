@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; 
 import 'budget_manager.dart';
-
+import 'app_drawer.dart';
 class BudgetSetupScreen extends StatefulWidget {
   const BudgetSetupScreen({super.key});
 
@@ -31,6 +31,7 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(

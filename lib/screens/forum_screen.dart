@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'social_forum_service.dart';
-
+import 'app_drawer.dart';
 class ForumScreen extends StatefulWidget {
   const ForumScreen({Key? key}) : super(key: key);
 
@@ -41,6 +41,7 @@ class _ForumScreenState extends State<ForumScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Community Forum')),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
 

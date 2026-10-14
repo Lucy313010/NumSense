@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'receipt_parser.dart';
 import 'cart_manager.dart';
-
+import 'app_drawer.dart';
 enum _WeightStep { priceTag, scaleWeight, confirm }
 
 class WeightItemScreen extends StatefulWidget {
@@ -157,6 +157,7 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
   }) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

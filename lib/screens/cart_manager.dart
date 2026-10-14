@@ -32,11 +32,12 @@ class CartManager {
   double checkout() {
     final spent = totalSpent;
     items.value = [];
-    BudgetManager.instance.setBudget(BudgetManager.instance.currentBudget + spent);
     return spent;
   }
 
   void clear() {
+    final spent = totalSpent;
     items.value = [];
+    BudgetManager.instance.setBudget(BudgetManager.instance.currentBudget + spent);
   }
 }

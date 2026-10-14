@@ -3,7 +3,7 @@ import 'cart_manager.dart';
 import 'scan_purpose.dart';
 import 'shopping_camera_screen.dart';
 import 'weight_item_screen.dart';
-
+import 'app_drawer.dart';
 class AddItemOptionsScreen extends StatelessWidget {
   const AddItemOptionsScreen({super.key});
 
@@ -97,6 +97,7 @@ class AddItemOptionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Item Details")),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: ListView(

@@ -6,6 +6,7 @@ import 'compare_items_screen.dart';
 import 'compare_manager.dart';
 import 'login_screen.dart';
 import 'community_map_screen.dart';
+import 'app_drawer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class HomeScreen extends StatelessWidget {
         title: const Text("NumSense"),
         centerTitle: true,
       ),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           if (isGuest)
@@ -56,6 +58,25 @@ class HomeScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.shopping_cart),
+                      label: const Text("Start Shopping (Quick Add)", style: TextStyle(fontSize: 18)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            settings: const RouteSettings(name: '/activeList'),
+                            builder: (context) => const ActiveShoppingListScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
                       onPressed: () {
@@ -80,26 +101,12 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  SavedShoppingListsScreen()),
+                          MaterialPageRoute(builder: (context) => const SavedShoppingListsScreen()),
                         );
                       },
                       child: const Text("Past Shopping Items", style: TextStyle(fontSize: 18)),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            settings: const RouteSettings(name: '/activeList'),
-                            builder: (context) => const ActiveShoppingListScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text("Start Shopping", style: TextStyle(fontSize: 18)),
-                    ),
-                    const SizedBox(height: 20),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.map_outlined),
                       label: const Text("Community Safe Map", style: TextStyle(fontSize: 18)),

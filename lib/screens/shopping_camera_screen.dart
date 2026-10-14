@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'app_drawer.dart';
 import 'confirm_text_screen.dart';
 import 'scan_purpose.dart';
 import 'receipt_parser.dart';
@@ -83,6 +83,7 @@ Future<void> _analyzeImage(File imageFile) async {
       appBar: AppBar(
         title: Text("Scan ${widget.captureType}"),
       ),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

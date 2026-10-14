@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'shopping_camera_screen.dart';
 import 'scan_purpose.dart';
-
+import 'app_drawer.dart';
 class PhotoBranchScreen extends StatelessWidget {
   const PhotoBranchScreen({super.key});
 
@@ -9,6 +9,7 @@ class PhotoBranchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("What are we scanning?")),
+      drawer: const AppDrawer(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),

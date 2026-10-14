@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'nearby_shop.dart'; 
-
+import 'app_drawer.dart';
 class LocationScreen extends StatelessWidget {
   const LocationScreen({super.key});
 
@@ -11,6 +11,7 @@ class LocationScreen extends StatelessWidget {
         title: const Text("NumSense"),
         centerTitle: true,
       ),
+      drawer: const AppDrawer(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40.0),

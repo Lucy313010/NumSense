@@ -3,7 +3,7 @@ import 'compare_manager.dart';
 import 'compare_results_screen.dart';
 import 'scan_purpose.dart';
 import 'shopping_camera_screen.dart';
-
+import 'app_drawer.dart';
 class CompareItemsScreen extends StatelessWidget {
   const CompareItemsScreen({super.key});
 
@@ -23,6 +23,7 @@ class CompareItemsScreen extends StatelessWidget {
         final bool canCompare = entries.length >= 2;
 
         return Scaffold(
+          drawer: const AppDrawer(),
           appBar: AppBar(
             title: const Text("Compare Prices"),
             actions: [

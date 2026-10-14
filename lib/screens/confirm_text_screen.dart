@@ -4,7 +4,7 @@ import 'cart_manager.dart';
 import 'compare_manager.dart';
 import 'receipt_parser.dart';
 import 'scan_purpose.dart';
-
+import 'app_drawer.dart';
 class ConfirmTextScreen extends StatefulWidget {
   final File imageFile;
   final String rawText;
@@ -99,6 +99,7 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(_isCompare ? "Confirm Item" : "Confirm Details")),
+      drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: ListView(
