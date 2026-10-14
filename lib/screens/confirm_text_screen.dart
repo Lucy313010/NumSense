@@ -5,11 +5,13 @@ import 'compare_manager.dart';
 import 'receipt_parser.dart';
 import 'scan_purpose.dart';
 import 'app_drawer.dart';
+
 class ConfirmTextScreen extends StatefulWidget {
   final File imageFile;
   final String rawText;
   final String initialItemName;
   final double? initialPrice;
+  final bool priceInferred;
   final ScanPurpose purpose;
 
   const ConfirmTextScreen({
@@ -19,6 +21,7 @@ class ConfirmTextScreen extends StatefulWidget {
     required this.initialItemName,
     required this.initialPrice,
     required this.purpose,
+    this.priceInferred = false,
   });
 
   @override
@@ -128,6 +131,13 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            if (widget.priceInferred) ...[
+              const SizedBox(height: 8),
+              const Text(
+                "We guessed the decimal point from the price tag — please double check this is right.",
+                style: TextStyle(color: Colors.orange, fontSize: 13),
+              ),
+            ],
             if (_isCompare) ...[
               const SizedBox(height: 16),
               const Text(

@@ -5,6 +5,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'receipt_parser.dart';
 import 'cart_manager.dart';
 import 'app_drawer.dart';
+
 enum _WeightStep { priceTag, scaleWeight, confirm }
 
 class WeightItemScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
 
   _WeightStep _step = _WeightStep.priceTag;
   bool _isAnalyzing = false;
+  bool _priceWasInferred = false;
 
   File? _priceTagImage;
   File? _scaleImage;
@@ -66,10 +68,16 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
     });
 
     String rawText = "";
+    final List<TextLineInfo> lineInfos = [];
     try {
       final inputImage = InputImage.fromFile(file);
       final recognizedText = await _textRecognizer.processImage(inputImage);
       rawText = recognizedText.text;
+      for (final block in recognizedText.blocks) {
+        for (final line in block.lines) {
+          lineInfos.add(TextLineInfo(line.text, line.boundingBox.height.toDouble()));
+        }
+      }
     } catch (e) {
       rawText = "";
     }
@@ -77,10 +85,11 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
     if (!mounted) return;
 
     if (isPriceTag) {
-      final parsed = ReceiptParser.parse(rawText);
+      final parsed = ReceiptParser.parse(rawText, lines: lineInfos);
       _nameController.text = parsed.itemName;
       _pricePerUnitController.text = parsed.price != null ? parsed.price!.toStringAsFixed(2) : "";
       setState(() {
+        _priceWasInferred = parsed.priceInferred;
         _isAnalyzing = false;
         _step = _WeightStep.scaleWeight;
       });
@@ -251,6 +260,13 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            if (_priceWasInferred) ...[
+              const SizedBox(height: 8),
+              const Text(
+                "We guessed the decimal point from the price tag — double check this.",
+                style: TextStyle(color: Colors.orange, fontSize: 13),
+              ),
+            ],
             const SizedBox(height: 16),
             TextField(
               controller: _weightController,

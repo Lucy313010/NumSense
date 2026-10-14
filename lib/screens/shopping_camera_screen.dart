@@ -48,10 +48,16 @@ Future<void> _analyzeImage(File imageFile) async {
     });
 
     String rawText = "";
+    final List<TextLineInfo> lineInfos = [];
     try {
       final inputImage = InputImage.fromFile(imageFile);
       final RecognizedText recognizedText = await _textRecognizer.processImage(inputImage);
       rawText = recognizedText.text;
+      for (final block in recognizedText.blocks) {
+        for (final line in block.lines) {
+          lineInfos.add(TextLineInfo(line.text, line.boundingBox.height.toDouble()));
+        }
+      }
     } catch (e) {
       rawText = "";
     }
@@ -61,7 +67,7 @@ Future<void> _analyzeImage(File imageFile) async {
       _isAnalyzing = false;
     });
 
-    final parsed = ReceiptParser.parse(rawText);
+    final parsed = ReceiptParser.parse(rawText, lines: lineInfos);
 
     Navigator.push(
       context,
@@ -71,6 +77,7 @@ Future<void> _analyzeImage(File imageFile) async {
           rawText: rawText,
           initialItemName: parsed.itemName,
           initialPrice: parsed.price,
+          priceInferred: parsed.priceInferred,
           purpose: widget.purpose,
         ),
       ),
