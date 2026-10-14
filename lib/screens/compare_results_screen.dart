@@ -3,6 +3,7 @@ import 'active_shopping_list_screen.dart';
 import 'cart_manager.dart';
 import 'compare_manager.dart';
 import 'app_drawer.dart';
+import 'custom_app_bar.dart';
 class CompareResultsScreen extends StatelessWidget {
   const CompareResultsScreen({super.key});
 
@@ -15,7 +16,7 @@ class CompareResultsScreen extends StatelessWidget {
 
     if (entries.length < 2) {
       return Scaffold(
-        appBar: AppBar(title: const Text("Results")),
+        appBar: CustomAppBar(title: "Results"),
         body: const Center(child: Text("Scan at least 2 items to compare.")),
       );
     }

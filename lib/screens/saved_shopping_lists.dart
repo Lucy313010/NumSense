@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'grocery_export_screen.dart';
 import 'app_drawer.dart';
+import 'custom_app_bar.dart';
+
 class SavedShoppingListsScreen extends StatelessWidget {
   const SavedShoppingListsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Saved Shopping Lists'),
-      ),
+      appBar: const CustomAppBar(title: "Saved Shopping Lists"),
       drawer: const AppDrawer(),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('shopping_lists').orderBy('createdAt', descending: true).snapshots(),

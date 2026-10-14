@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'home_screen.dart';
 import 'app_drawer.dart';
+import 'custom_app_bar.dart';
 class EmojiRatingScreen extends StatefulWidget {
   const EmojiRatingScreen({super.key});
 
@@ -71,7 +72,7 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text("Checkout Complete")),
+      appBar: CustomAppBar(title: "Checkout Complete"),
       drawer: const AppDrawer(),
       body: Center(
         child: _isSubmitting

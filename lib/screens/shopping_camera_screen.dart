@@ -6,7 +6,7 @@ import 'confirm_text_screen.dart';
 import 'scan_purpose.dart';
 import 'receipt_parser.dart';
 import 'image_crop_helper.dart';
-
+import 'custom_app_bar.dart';
 class ShoppingCameraScreen extends StatefulWidget {
   final String captureType;
   final ScanPurpose purpose;
@@ -89,8 +89,8 @@ class _ShoppingCameraScreenState extends State<ShoppingCameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Scan ${widget.captureType}"),
+      appBar: CustomAppBar(
+        title: "Scan ${widget.captureType}",
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),

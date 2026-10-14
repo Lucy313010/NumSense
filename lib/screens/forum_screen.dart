@@ -40,7 +40,7 @@ class _ForumScreenState extends State<ForumScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Community Forum')),
+      appBar: CustomAppBar(title: const Text('Community Forum')),
       drawer: const AppDrawer(),
       body: Column(
         children: [

@@ -6,7 +6,7 @@ import 'receipt_parser.dart';
 import 'cart_manager.dart';
 import 'app_drawer.dart';
 import 'image_crop_helper.dart';
-
+import 'custom_app_bar.dart';
 enum _WeightStep { priceTag, scaleWeight, confirm }
 
 class WeightItemScreen extends StatefulWidget {
@@ -215,7 +215,7 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
 
   Widget _buildConfirmStep() {
     return Scaffold(
-      appBar: AppBar(title: const Text("Confirm Weighted Item")),
+      appBar: CustomAppBar(title: "Confirm Weighted Item"),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: ListView(

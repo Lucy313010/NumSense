@@ -4,6 +4,8 @@ import 'compare_results_screen.dart';
 import 'scan_purpose.dart';
 import 'shopping_camera_screen.dart';
 import 'app_drawer.dart';
+import 'custom_app_bar.dart';
+
 class CompareItemsScreen extends StatelessWidget {
   const CompareItemsScreen({super.key});
 
@@ -24,21 +26,20 @@ class CompareItemsScreen extends StatelessWidget {
 
         return Scaffold(
           drawer: const AppDrawer(),
-          appBar: AppBar(
-            title: const Text("Compare Prices"),
-            actions: [
-              if (entries.isNotEmpty)
-                TextButton(
-                  onPressed: CompareManager.instance.clear,
-                  child: const Text("Clear"),
-                ),
-            ],
-          ),
+          appBar: const CustomAppBar(title: "Compare Prices"),
           body: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (entries.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: CompareManager.instance.clear,
+                      child: const Text("Clear List"),
+                    ),
+                  ),
                 const Text(
                   "Scan the price tag of each item you want to compare (at least 2).",
                   textAlign: TextAlign.center,

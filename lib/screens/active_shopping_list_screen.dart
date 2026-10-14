@@ -6,6 +6,7 @@ import 'cart_manager.dart';
 import 'emoji_rating_screen.dart';
 import 'trip_history_manager.dart';
 import 'app_drawer.dart';
+import 'custom_app_bar.dart';
 
 class ActiveShoppingListScreen extends StatelessWidget {
  const ActiveShoppingListScreen({super.key});
@@ -96,7 +97,7 @@ class ActiveShoppingListScreen extends StatelessWidget {
  @override
  Widget build(BuildContext context) {
    return Scaffold(
-     appBar: AppBar(title: const Text("Start Shopping")),
+     appBar: const CustomAppBar(title: "Start Shopping"),
      drawer: const AppDrawer(),
      body: ValueListenableBuilder<double>(
        valueListenable: BudgetManager.instance.budget,

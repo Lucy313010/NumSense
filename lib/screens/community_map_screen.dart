@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'app_drawer.dart';
+import 'custom_app_bar.dart';
 
 class CommunityMapScreen extends StatefulWidget {
   const CommunityMapScreen({Key? key}) : super(key: key);
@@ -146,18 +148,11 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
   Widget build(BuildContext context) {
     final initialTarget = _currentPosition != null
         ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-        : const LatLng(37.7749, -122.4194); // Default fallback
+        : const LatLng(37.7749, -122.4194);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Community Safe Map'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.my_location),
-            onPressed: _determinePosition,
-          )
-        ],
-      ),
+      appBar: const CustomAppBar(title: 'Community Safe Map'),
+      drawer: const AppDrawer(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(
