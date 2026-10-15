@@ -8,6 +8,8 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<SettingsProvider>(context);
+
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -21,13 +23,33 @@ class AppDrawer extends StatelessWidget {
             ),
             const Divider(),
             SwitchListTile(
-              title: const Text("Dyslexia Friendly Font"),
+              title: const Text("Accessibility Font"),
               secondary: const Icon(Icons.text_fields),
-              value: Provider.of<SettingsProvider>(context).isDyslexiaFontEnabled,
+              value: settings.isDyslexiaFontEnabled,
               onChanged: (bool value) {
                 Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
               },
             ),
+            if (settings.isDyslexiaFontEnabled)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(
+                    labelText: "Select Font",
+                    border: OutlineInputBorder(),
+                  ),
+                  isExpanded: true,
+                  value: settings.selectedFont,
+                  items: settings.availableFonts.map((font) {
+                    return DropdownMenuItem(value: font, child: Text(font));
+                  }).toList(),
+                  onChanged: (String? newFont) {
+                    if (newFont != null) {
+                      Provider.of<SettingsProvider>(context, listen: false).setSelectedFont(newFont);
+                    }
+                  },
+                ),
+              ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.forum_outlined, color: Colors.blueAccent),

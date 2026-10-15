@@ -12,11 +12,13 @@ class MyApp extends StatelessWidget {
       builder: (context, settings, child) {
         return MaterialApp(
           title: 'NumSense',
+ 
           theme: ThemeData(
+
+            fontFamily: Provider.of<SettingsProvider>(context).isDyslexiaFontEnabled 
+                ? Provider.of<SettingsProvider>(context).selectedFont 
+                : null, 
             primarySwatch: Colors.blue,
-            useMaterial3: true,
-            // switches globally when the provider state changes
-            fontFamily: settings.isDyslexiaFontEnabled ? 'OpenDyslexic' : null,
           ),
           home: const LoginScreen(),
         );

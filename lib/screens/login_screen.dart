@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'welcome_screen.dart';
-import 'app_drawer.dart';
 import '../settings_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -112,10 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleGoogleLogin() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      
-      if (googleUser == null) {
-        return;
-      }
+      if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
@@ -143,6 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<SettingsProvider>(context);
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -156,18 +154,44 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Align(
                     alignment: Alignment.centerRight,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text("Dyslexia Font", style: TextStyle(fontSize: 14)),
-                        Switch(
-                          value: Provider.of<SettingsProvider>(context).isDyslexiaFontEnabled,
-                          activeColor: Colors.blueAccent,
-                          onChanged: (bool value) {
-                            Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
-                          },
-                        ),
-                      ],
+                    child: Container(
+                      width: 200,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const Text("Accessibility Font", style: TextStyle(fontSize: 12)),
+                              Switch(
+                                value: settings.isDyslexiaFontEnabled,
+                                activeColor: Colors.blueAccent,
+                                onChanged: (bool value) {
+                                  Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
+                                },
+                              ),
+                            ],
+                          ),
+                          if (settings.isDyslexiaFontEnabled)
+                            DropdownButton<String>(
+                              isExpanded: true,
+                              value: settings.selectedFont,
+                              items: settings.availableFonts.map((font) {
+                                return DropdownMenuItem(value: font, child: Text(font));
+                              }).toList(),
+                              onChanged: (String? newFont) {
+                                if (newFont != null) {
+                                  Provider.of<SettingsProvider>(context, listen: false).setSelectedFont(newFont);
+                                }
+                              },
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),

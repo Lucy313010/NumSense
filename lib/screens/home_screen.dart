@@ -17,6 +17,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final bool isGuest = user?.isAnonymous ?? false;
+    final settings = Provider.of<SettingsProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -58,7 +59,6 @@ class HomeScreen extends StatelessWidget {
                 child: ListView(
                   shrinkWrap: true,
                   children: [
-                    // New Inline Toggle Box
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       margin: const EdgeInsets.only(bottom: 24),
@@ -67,26 +67,44 @@ class HomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.grey[300]!),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
                         children: [
-                          const Expanded(
-                            child: Text(
-                              "Dyslexia Font",
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  "Accessibility Font",
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Switch(
+                                value: settings.isDyslexiaFontEnabled,
+                                activeColor: Colors.blueAccent,
+                                onChanged: (bool value) {
+                                  Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
+                                },
+                              ),
+                            ],
+                          ),
+                          if (settings.isDyslexiaFontEnabled) ...[
+                            const Divider(),
+                            DropdownButton<String>(
+                              isExpanded: true,
+                              value: settings.selectedFont,
+                              items: settings.availableFonts.map((font) {
+                                return DropdownMenuItem(value: font, child: Text(font));
+                              }).toList(),
+                              onChanged: (String? newFont) {
+                                if (newFont != null) {
+                                  Provider.of<SettingsProvider>(context, listen: false).setSelectedFont(newFont);
+                                }
+                              },
                             ),
-                          ),
-                          Switch(
-                            value: Provider.of<SettingsProvider>(context).isDyslexiaFontEnabled,
-                            activeColor: Colors.blueAccent,
-                            onChanged: (bool value) {
-                              Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
-                            },
-                          ),
+                          ],
                         ],
                       ),
                     ),
-                    
                     ElevatedButton.icon(
                       icon: const Icon(Icons.shopping_cart),
                       label: const Text(
