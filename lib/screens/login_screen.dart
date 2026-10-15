@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart'; 
-import 'welcome_screen.dart'; 
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'welcome_screen.dart';
 import 'app_drawer.dart';
+import '../settings_provider.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -106,35 +109,27 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Google sign in configuration
   Future<void> _handleGoogleLogin() async {
     try {
-      // 1. Trigger the google authentication flow popup
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       
       if (googleUser == null) {
-        // User canceled the sign-in popup
         return;
       }
 
-      // 2. get authorization details from the user's Google account
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // 3. Create a secure credential for firebase using google's tokens
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // 4. Securely sign in to firebase with the credential
       UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Successfully signed in as ${userCredential.user?.displayName ?? "User"}!')),
         );
-
-        // 5. navigate to app's main flow
         _goToWelcome();
       }
     } catch (e) {
@@ -159,6 +154,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("Dyslexia Font", style: TextStyle(fontSize: 14)),
+                        Switch(
+                          value: Provider.of<SettingsProvider>(context).isDyslexiaFontEnabled,
+                          activeColor: Colors.blueAccent,
+                          onChanged: (bool value) {
+                            Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   const Text(
                     'Welcome to NumSense!',
                     style: TextStyle(

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../settings_provider.dart';
 import 'saved_shopping_lists.dart';
 import 'active_shopping_list_screen.dart';
 import 'compare_items_screen.dart';
 import 'compare_manager.dart';
 import 'login_screen.dart';
 import 'community_map_screen.dart';
-import 'app_drawer.dart';
+import 'forum_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -21,7 +23,6 @@ class HomeScreen extends StatelessWidget {
         title: const Text("NumSense"),
         centerTitle: true,
       ),
-      drawer: const AppDrawer(),
       body: Column(
         children: [
           if (isGuest)
@@ -54,15 +55,47 @@ class HomeScreen extends StatelessWidget {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: ListView(
+                  shrinkWrap: true,
                   children: [
+                    // New Inline Toggle Box
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              "Dyslexia Font",
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Switch(
+                            value: Provider.of<SettingsProvider>(context).isDyslexiaFontEnabled,
+                            activeColor: Colors.blueAccent,
+                            onChanged: (bool value) {
+                              Provider.of<SettingsProvider>(context, listen: false).toggleDyslexiaFont(value);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    
                     ElevatedButton.icon(
                       icon: const Icon(Icons.shopping_cart),
-                      label: const Text("Start Shopping (Quick Add)", style: TextStyle(fontSize: 18)),
+                      label: const Text(
+                        "Start Shopping\n(Quick Add)", 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, height: 1.2),
+                      ),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                         backgroundColor: Colors.blueAccent,
                         foregroundColor: Colors.white,
                       ),
@@ -76,9 +109,11 @@ class HomeScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      ),
                       onPressed: () {
                         CompareManager.instance.clear();
                         Navigator.push(
@@ -92,26 +127,36 @@ class HomeScreen extends StatelessWidget {
                       child: const Text(
                         "Snap A Photo -\nCompare Prices",
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(fontSize: 16, height: 1.2),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 20)),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const SavedShoppingListsScreen()),
                         );
                       },
-                      child: const Text("Past Shopping Items", style: TextStyle(fontSize: 18)),
+                      child: const Text(
+                        "Past Shopping Items", 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.map_outlined),
-                      label: const Text("Community Safe Map", style: TextStyle(fontSize: 18)),
+                      label: const Text(
+                        "Community Safe Map", 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
                         backgroundColor: Colors.black87,
                         foregroundColor: Colors.white,
                       ),
@@ -119,6 +164,26 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const CommunityMapScreen()),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.forum_outlined),
+                      label: const Text(
+                        "Community Forum", 
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ForumScreen()),
                         );
                       },
                     ),
