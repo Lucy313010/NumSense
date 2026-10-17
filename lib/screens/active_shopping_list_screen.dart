@@ -17,86 +17,67 @@ class ActiveShoppingListScreen extends StatelessWidget {
    return Colors.redAccent;
  }
 
- Future<void> _finishCheckout(BuildContext context) async {
-   final cartItems = CartManager.instance.items.value;
-   if (cartItems.isEmpty) {
-     ScaffoldMessenger.of(context).showSnackBar(
-       const SnackBar(content: Text("Your cart is empty — add an item first.")),
-     );
-     return;
-   }
+  Future<void> _finishCheckout(BuildContext context) async {
+    final cartItems = CartManager.instance.items.value;
+    if (cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Your cart is empty — add an item first.")),
+      );
+      return;
+    }
 
-   final storeController = TextEditingController();
-   final storeName = await showDialog<String>(
-     context: context,
-     builder: (dialogContext) => AlertDialog(
-       title: const Text("Where did you shop?"),
-       content: TextField(
-         controller: storeController,
-         autofocus: true,
-         textCapitalization: TextCapitalization.words,
-         decoration: const InputDecoration(hintText: "Store name", border: OutlineInputBorder()),
-       ),
-       actions: [
-         TextButton(
-           onPressed: () => Navigator.pop(dialogContext),
-           child: const Text("Cancel"),
-         ),
-         ElevatedButton(
-           onPressed: () => Navigator.pop(dialogContext, storeController.text.trim()),
-           child: const Text("Save Trip"),
-         ),
-       ],
-     ),
-   );
+    final storeController = TextEditingController();
+    final storeName = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Where did you shop?"),
+        content: TextField(
+          controller: storeController,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(hintText: "Store name", border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, storeController.text.trim()),
+            child: const Text("Save Trip"),
+          ),
+        ],
+      ),
+    );
 
-   if (storeName == null || !context.mounted) return;
+    if (storeName == null || !context.mounted) return;
 
-   final spent = CartManager.instance.totalSpent;
-   final startingBudget = BudgetManager.instance.currentBudget + spent;
-   final finalStoreName = storeName.isEmpty ? "Unnamed Store" : storeName;
+    final purchasedItems = List<CartItem>.from(cartItems);
+    final spent = CartManager.instance.totalSpent;
+    final startingBudget = BudgetManager.instance.currentBudget + spent;
+    final finalStoreName = storeName.isEmpty ? "Unnamed Store" : storeName;
 
-   try {
-     await FirebaseFirestore.instance.collection('shopping_lists').add({
-       'title': finalStoreName,
-       'items': cartItems.map((item) => "${item.name} - \$${item.price.toStringAsFixed(2)}").toList(),
-       'totalSpent': spent,
-       'budget': startingBudget,
-       'createdAt': FieldValue.serverTimestamp(),
-     });
-   } catch (e) {
-     if (context.mounted) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Failed to save to cloud: $e')),
-       );
-     }
-   }
+    TripHistoryManager.instance.addTrip(
+      SavedShoppingList(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        storeName: finalStoreName,
+        date: DateTime.now(),
+        totalSpent: spent,
+        budget: startingBudget,
+        items: purchasedItems,
+        dealIndicator: TripHistoryManager.dealLabel(spent, startingBudget),
+      ),
+    );
 
-   TripHistoryManager.instance.addTrip(
-     SavedShoppingList(
-       id: DateTime.now().millisecondsSinceEpoch.toString(),
-       storeName: finalStoreName,
-       date: DateTime.now(),
-       totalSpent: spent,
-       budget: startingBudget,
-       itemCount: cartItems.length,
-       dealIndicator: TripHistoryManager.dealLabel(spent, startingBudget),
-     ),
-   );
-     if (context.mounted) {
-     ScaffoldMessenger.of(context).showSnackBar(
-       SnackBar(content: Text('Trip saved. Total trips now: ${TripHistoryManager.instance.trips.value.length}')),
-     );
-   }
-   CartManager.instance.checkout();
+    CartManager.instance.checkout();
 
-   if (context.mounted) {
-     Navigator.push(
-       context,
-       MaterialPageRoute(builder: (context) => const EmojiRatingScreen()),
-     );
-   }
- }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EmojiRatingScreen(storeName: finalStoreName),
+      ),
+    );
+  }
 
  @override
  Widget build(BuildContext context) {

@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
-import 'app_drawer.dart';
+import 'cart_manager.dart';
+
 class SavedShoppingList {
   final String id;
   final String storeName;
   final DateTime date;
   final double totalSpent;
   final double budget;
-  final int itemCount;
+  final List<CartItem> items;
   final String dealIndicator;
 
   SavedShoppingList({
@@ -15,9 +16,11 @@ class SavedShoppingList {
     required this.date,
     required this.totalSpent,
     required this.budget,
-    required this.itemCount,
+    required this.items,
     required this.dealIndicator,
   });
+
+  int get itemCount => items.length;
 }
 
 class TripHistoryManager {

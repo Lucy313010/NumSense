@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'home_screen.dart';
-import 'app_drawer.dart';
-import 'custom_app_bar.dart';
+
 class EmojiRatingScreen extends StatefulWidget {
-  const EmojiRatingScreen({super.key});
+  final String storeName;
+
+  const EmojiRatingScreen({super.key, required this.storeName});
 
   @override
   State<EmojiRatingScreen> createState() => _EmojiRatingScreenState();
@@ -29,22 +30,21 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Ask for location permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception("Location permission needed to map this store.");
-        }
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        throw Exception("Location permission is needed to place this store on the map.");
       }
 
-      // Get exact GPS coordinates
-      Position position = await Geolocator.getCurrentPosition(
+      final Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Save to Firestore (anonymous & community Shared)
       await FirebaseFirestore.instance.collection('cognitive_ratings').add({
+        'storeName': widget.storeName,
         'latitude': position.latitude,
         'longitude': position.longitude,
         'rating': ratingScore,
@@ -55,7 +55,6 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Thanks for helping the community! 🩵')),
         );
-        
         _goHome();
       }
     } catch (e) {
@@ -72,8 +71,7 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: "Checkout Complete"),
-      drawer: const AppDrawer(),
+      appBar: AppBar(title: const Text("Checkout Complete")),
       body: Center(
         child: _isSubmitting
             ? const Column(
@@ -81,18 +79,18 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text("Saving to community map...")
+                  Text("Saving to community map..."),
                 ],
               )
-            : Padding(
+            : SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      "How was the math environment here?",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    Text(
+                      "How was the math environment at ${widget.storeName}?",
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -101,22 +99,25 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
                       style: TextStyle(fontSize: 16, color: Colors.grey),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 40),
-
+                    const SizedBox(height: 8),
+                    const Text(
+                      "The pin is placed where you are right now, so rate while you're still at the store.",
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
                     _buildEmojiButton(
                       emoji: "🟢",
                       title: "Clear tags, easy to navigate",
                       onPressed: () => _submitRating(1),
                     ),
                     const SizedBox(height: 16),
-
                     _buildEmojiButton(
                       emoji: "🟡",
                       title: "A bit busy, manageable",
                       onPressed: () => _submitRating(2),
                     ),
                     const SizedBox(height: 16),
-
                     _buildEmojiButton(
                       emoji: "🔴",
                       title: "Confusing math, high stress",
@@ -134,7 +135,11 @@ class _EmojiRatingScreenState extends State<EmojiRatingScreen> {
     );
   }
 
-  Widget _buildEmojiButton({required String emoji, required String title, required VoidCallback onPressed}) {
+  Widget _buildEmojiButton({
+    required String emoji,
+    required String title,
+    required VoidCallback onPressed,
+  }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
