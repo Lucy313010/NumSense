@@ -73,8 +73,8 @@ class _ForumScreenState extends State<ForumScreen> {
                  child: ElevatedButton.icon(
                    icon: const Icon(Icons.send),
                    label: _isPosting
-                       ? const Text('Publishing to all platforms...')
-                       : const Text('Post to App, FB & Reddit'),
+                       ? const Text('Publishing...')
+                       : const Text('Post to Forum'),
                    onPressed: _isPosting ? null : _submitPost,
                  ),
                ),
