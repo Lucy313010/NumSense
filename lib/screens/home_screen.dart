@@ -9,6 +9,7 @@ import 'compare_manager.dart';
 import 'login_screen.dart';
 import 'community_map_screen.dart';
 import 'forum_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -105,6 +106,38 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
+                    
+                    // NEW: Profile & History Button
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 64,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                            foregroundColor: Colors.blueAccent,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: Colors.blueAccent.withOpacity(0.3), width: 2),
+                            ),
+                          ),
+                          icon: const Icon(Icons.person, size: 28),
+                          label: const Text(
+                            "View Profile & History",
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
                     ElevatedButton.icon(
                       icon: const Icon(Icons.shopping_cart),
                       label: const Text(
@@ -146,23 +179,6 @@ class HomeScreen extends StatelessWidget {
                         "Snap A Photo -\nCompare Prices",
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 16, height: 1.2),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SavedShoppingListsScreen()),
-                        );
-                      },
-                      child: const Text(
-                        "Past Shopping Items", 
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
                       ),
                     ),
                     const SizedBox(height: 16),
