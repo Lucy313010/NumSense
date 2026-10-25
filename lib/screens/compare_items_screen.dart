@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'compare_manager.dart';
 import 'compare_results_screen.dart';
 import 'scan_purpose.dart';
@@ -8,14 +9,6 @@ import 'custom_app_bar.dart';
 
 class CompareItemsScreen extends StatelessWidget {
   const CompareItemsScreen({super.key});
-
-  String _subtitle(CompareEntry e) {
-    final perOz = e.pricePerOz;
-    if (e.sizeLabel == null || perOz == null) {
-      return "No size — comparing shelf price only";
-    }
-    return "${e.sizeLabel} · \$${perOz.toStringAsFixed(3)}/oz";
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,78 +25,133 @@ class CompareItemsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+
                 if (entries.isNotEmpty)
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: CompareManager.instance.clear,
-                      child: const Text("Clear List"),
+                      child: const Text("Clear All"),
                     ),
                   ),
-                const Text(
-                  "Scan the price tag of each item you want to compare (at least 2).",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
+                  
+          
                 Expanded(
-                  child: entries.isEmpty
-                      ? const Center(
-                          child: Text(
-                            "No items scanned yet.",
-                            style: TextStyle(color: Colors.grey),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.compare_arrows, size: 80, color: Colors.blueAccent),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.photo_camera, size: 28),
+                          label: Text(
+                            entries.isEmpty ? "Scan First Item" : "Scan Another Item",
+                            style: const TextStyle(fontSize: 20)
                           ),
-                        )
-                      : ListView.builder(
-                          itemCount: entries.length,
-                          itemBuilder: (context, index) {
-                            final entry = entries[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                title: Text(entry.name),
-                                subtitle: Text(_subtitle(entry)),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '\$${entry.price.toStringAsFixed(2)}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.close, size: 18, color: Colors.grey),
-                                      onPressed: () => CompareManager.instance.removeAt(index),
-                                    ),
-                                  ],
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ShoppingCameraScreen(
+                                  captureType: "Price Tag",
+                                  purpose: ScanPurpose.comparePrice,
                                 ),
                               ),
                             );
                           },
                         ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Scan as many price tags as you want.",
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.photo_camera),
-                  label: Text(entries.isEmpty ? "Scan First Item" : "Scan Another Item"),
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ShoppingCameraScreen(
-                          captureType: "Price Tag",
-                          purpose: ScanPurpose.comparePrice,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
+
+                if (entries.isNotEmpty) ...[
+                  const Text("Scanned Items:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 140, 
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = entries[index];
+                        return Container(
+                          width: 120,
+                          margin: const EdgeInsets.only(right: 12),
+                          child: Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: entry.imageFile != null
+                                      ? Image.file(entry.imageFile!, fit: BoxFit.cover)
+                                      : Container(color: Colors.grey[300], child: const Icon(Icons.image)),
+                                ),
+                              ),
+                              
+                              Positioned.fill(
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      colors: [Colors.black87, Colors.transparent],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 8,
+                                left: 8,
+                                right: 8,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('\$${entry.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                    Text(entry.name, style: const TextStyle(color: Colors.white, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => CompareManager.instance.removeAt(index),
+                                  child: const CircleAvatar(
+                                    radius: 12,
+                                    backgroundColor: Colors.red,
+                                    child: Icon(Icons.close, size: 14, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
+                    backgroundColor: canCompare ? Colors.black : Colors.grey[300],
+                    foregroundColor: canCompare ? Colors.white : Colors.grey[600],
                   ),
                   onPressed: canCompare
                       ? () {
@@ -113,7 +161,10 @@ class CompareItemsScreen extends StatelessWidget {
                           );
                         }
                       : null,
-                  child: Text(canCompare ? "Compare ${entries.length} Items" : "Scan at least 2 items"),
+                  child: Text(
+                    canCompare ? "Compare Prices (${entries.length} Items)" : "Scan at least 2 items to compare",
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),

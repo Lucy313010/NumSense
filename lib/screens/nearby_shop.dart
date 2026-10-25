@@ -11,7 +11,7 @@ class NearbyShop extends StatelessWidget {
         title: const Text("NumSense"),
         centerTitle: true,
       ),
-      //AI implementation
+  
     );
   }
 }

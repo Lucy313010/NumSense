@@ -162,10 +162,10 @@ class _WeightItemScreenState extends State<WeightItemScreen> {
          ],
        ),
      );
-     return; // Stop the item from being added
+     return;
    }
 
-   // If affordable, add normally
+
    CartManager.instance.addItem(
      CartItem(name: name, price: totalPrice),
    );

@@ -58,7 +58,7 @@ class LikedPostsScreen extends StatelessWidget {
               
               final allPosts = snapshot.data?.docs ?? [];
               
-              // Filter out posts to only show ones where the user liked the post OR a reply
+            
               final posts = allPosts.where((doc) {
                 final data = doc.data() as Map<String, dynamic>;
                 final likedBy = List<String>.from(data['likedBy'] ?? []);

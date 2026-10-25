@@ -185,7 +185,7 @@ class _ForumScreenState extends State<ForumScreen> {
                            Text(data['content'] ?? '', style: const TextStyle(fontSize: 15)),
                            const SizedBox(height: 8),
                            
-                           // Immediate Action Buttons Row
+                       
                            Row(
                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                              children: [
@@ -219,7 +219,7 @@ class _ForumScreenState extends State<ForumScreen> {
                              ],
                            ),
                            
-                           // Replies Section
+                    
                            if (replies.isNotEmpty) ...[
                              const Divider(),
                              ...replies.map((reply) {

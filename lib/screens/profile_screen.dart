@@ -195,7 +195,7 @@ class ProfileScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
-                                          // Restored exact decimals for math clarity!
+                                        
                                           '\$${itemPrice.toStringAsFixed(2)} / \$${displayBudgetBefore.toStringAsFixed(2)} budget',
                                           style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                                         ),
@@ -287,7 +287,7 @@ class ProfileScreen extends StatelessWidget {
                                                 double tempBudget = totalItemsCost > 20 ? totalItemsCost + 30 : 50.0;
                                                 if (tempBudget < totalItemsCost) tempBudget = totalItemsCost + 10.0;
                                                 
-                                                tempBudget = tempBudget.roundToDouble(); // Start on a whole number
+                                                tempBudget = tempBudget.roundToDouble(); 
 
                                                 return StatefulBuilder(
                                                   builder: (context, setState) {
@@ -309,9 +309,9 @@ class ProfileScreen extends StatelessWidget {
                                                           ),
                                                           Slider(
                                                             value: tempBudget,
-                                                            min: totalItemsCost.roundToDouble(), // Round the minimum
-                                                            max: ((totalItemsCost + 150 > 200) ? totalItemsCost + 150 : 200).roundToDouble(), // Round the maximum
-                                                            onChanged: (val) => setState(() => tempBudget = val.roundToDouble()), // Force slide to whole numbers
+                                                            min: totalItemsCost.roundToDouble(),
+                                                            max: ((totalItemsCost + 150 > 200) ? totalItemsCost + 150 : 200).roundToDouble(),
+                                                            onChanged: (val) => setState(() => tempBudget = val.roundToDouble()), 
                                                           ),
                                                           const Text("Slide to change your budget", style: TextStyle(fontSize: 12, color: Colors.grey)),
                                                         ],

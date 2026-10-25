@@ -1,16 +1,19 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'app_drawer.dart';
+
 class CompareEntry {
   final String name;
   final double price;
   final double? sizeOz;
   final String? sizeLabel;
+  final File? imageFile;
 
   CompareEntry({
     required this.name,
     required this.price,
     this.sizeOz,
     this.sizeLabel,
+    this.imageFile,
   });
 
   double? get pricePerOz =>

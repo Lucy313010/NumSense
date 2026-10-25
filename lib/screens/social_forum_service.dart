@@ -27,14 +27,14 @@ class SocialForumService {
       'text': replyText,
       'authorId': authorId,
       'createdAt': Timestamp.now(),
-      'likedBy': [], // Track who likes this specific reply
+      'likedBy': [],
     };
     
     await FirebaseFirestore.instance.collection('forum_posts').doc(postId).update({
       'replies': FieldValue.arrayUnion([reply])
     });
 
-    // We removed the block preventing self-notifications so you can test it on yourself!
+  
     await FirebaseFirestore.instance.collection('notifications').add({
       'recipientId': postAuthorId,
       'senderId': authorId,
@@ -66,7 +66,7 @@ class SocialForumService {
   static Future<void> toggleReplyLike(String postId, Map<String, dynamic> reply, String userId, bool isCurrentlyLiked) async {
     final postRef = FirebaseFirestore.instance.collection('forum_posts').doc(postId);
     
-    // Safely update a specific item inside an array
+   
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       final snapshot = await transaction.get(postRef);
       if (!snapshot.exists) return;

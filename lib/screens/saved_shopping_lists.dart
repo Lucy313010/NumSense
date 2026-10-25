@@ -86,7 +86,7 @@ class _SavedShoppingListsScreenState extends State<SavedShoppingListsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                // Exact decimals for accuracy
+                               
                                 '\$${item.price.toStringAsFixed(2)} / \$${displayBudgetBefore.toStringAsFixed(2)} budget',
                                 style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                               ),
@@ -144,7 +144,7 @@ class _SavedShoppingListsScreenState extends State<SavedShoppingListsScreen> {
                                       double tempBudget = totalItemsCost > 20 ? totalItemsCost + 30 : 50.0;
                                       if (tempBudget < totalItemsCost) tempBudget = totalItemsCost + 10.0;
                                       
-                                      tempBudget = tempBudget.roundToDouble(); // Start on a whole number
+                                      tempBudget = tempBudget.roundToDouble();
 
                                       return StatefulBuilder(
                                         builder: (context, setState) {
@@ -166,9 +166,9 @@ class _SavedShoppingListsScreenState extends State<SavedShoppingListsScreen> {
                                                 ),
                                                 Slider(
                                                   value: tempBudget,
-                                                  min: totalItemsCost.roundToDouble(), // Round the minimum
-                                                  max: ((totalItemsCost + 150 > 200) ? totalItemsCost + 150 : 200).roundToDouble(), // Round the maximum
-                                                  onChanged: (val) => setState(() => tempBudget = val.roundToDouble()), // Force slide to whole numbers
+                                                  min: totalItemsCost.roundToDouble(), 
+                                                  max: ((totalItemsCost + 150 > 200) ? totalItemsCost + 150 : 200).roundToDouble(),  
+                                                  onChanged: (val) => setState(() => tempBudget = val.roundToDouble()), 
                                                 ),
                                                 const Text("Slide to change your budget", style: TextStyle(fontSize: 12, color: Colors.grey)),
                                               ],

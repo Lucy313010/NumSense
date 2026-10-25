@@ -132,7 +132,7 @@ class ActiveShoppingListScreen extends StatelessWidget {
                    const SizedBox(height: 10),
                    Center(
                      child: Text(
-                       // RESTORED: Shows the exact remaining budget including cents (e.g. $45.01)
+                      
                        '\$${budget.toStringAsFixed(2)}',
                        style: TextStyle(
                          fontSize: 40,
@@ -165,8 +165,7 @@ class ActiveShoppingListScreen extends StatelessWidget {
                        activeColor: _getSliderColor(budget),
                        inactiveColor: Colors.grey[200],
                        onChanged: (double value) {
-                         // MATH FIX: Force the *Initial Budget* to be a whole number, 
-                         // but keep the exact remaining cents perfectly accurate!
+                      
                          double spent = CartManager.instance.totalSpent;
                          double newInitialBudget = (value + spent).roundToDouble();
                          double exactRemainingBudget = newInitialBudget - spent;

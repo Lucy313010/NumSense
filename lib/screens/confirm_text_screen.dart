@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'cart_manager.dart';
 import 'budget_manager.dart';
+import 'compare_manager.dart'; 
 import 'scan_purpose.dart';
 import 'custom_app_bar.dart';
 
@@ -48,7 +49,7 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
     super.dispose();
   }
 
-  void _confirmAndAddToCart() {
+  void _confirmAction() {
     final name = _nameController.text.trim();
     final price = double.tryParse(_priceController.text.trim());
 
@@ -59,12 +60,26 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
       return;
     }
 
-    final remainingBudget = BudgetManager.instance.budget.value;
 
-    // BUDGET WARNING LOGIC
+    if (widget.purpose == ScanPurpose.comparePrice) {
+      CompareManager.instance.add(
+        CompareEntry(
+          name: name,
+          price: price,
+          imageFile: widget.imageFile, 
+        ),
+      );
+
+      Navigator.of(context).popUntil(
+        (route) => route.settings.name == '/compare' || route.isFirst,
+      );
+      return;
+    }
+
+
+    final remainingBudget = BudgetManager.instance.budget.value;
     if (price > remainingBudget) {
       HapticFeedback.heavyImpact();
-      
       showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
@@ -90,19 +105,18 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
-                Navigator.pop(dialogContext); 
+                Navigator.pop(dialogContext);
                 Navigator.of(context).popUntil(
                   (route) => route.settings.name == '/activeList' || route.isFirst,
-                ); 
+                );
               },
               child: const Text("Go to Checkout"),
             ),
           ],
         ),
       );
-      return; 
+      return;
     }
-
 
     CartManager.instance.addItem(CartItem(name: name, price: price));
     Navigator.of(context).popUntil(
@@ -112,6 +126,9 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
 
   @override
   Widget build(BuildContext context) {
+  
+    final bool isComparing = widget.purpose == ScanPurpose.comparePrice;
+
     return Scaffold(
       appBar: const CustomAppBar(title: "Confirm Scanned Item"),
       body: Padding(
@@ -177,15 +194,18 @@ class _ConfirmTextScreenState extends State<ConfirmTextScreen> {
             ],
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              icon: const Icon(Icons.add_shopping_cart),
-              label: const Text("Add to Cart", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              icon: Icon(isComparing ? Icons.compare : Icons.add_shopping_cart),
+              label: Text(
+                isComparing ? "Save to Compare List" : "Add to Cart", 
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+              ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: Colors.blueAccent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: _confirmAndAddToCart,
+              onPressed: _confirmAction,
             ),
           ],
         ),

@@ -107,7 +107,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     
-                    // NEW: Profile & History Button
+                 
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: SizedBox(

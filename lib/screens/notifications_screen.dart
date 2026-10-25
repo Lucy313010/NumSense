@@ -43,7 +43,7 @@ class NotificationsScreen extends StatelessWidget {
                       ),
                       title: Text(data['message'] ?? ''),
                       onTap: () {
-                        // mark as read when tapped
+                     
                         FirebaseFirestore.instance.collection('notifications').doc(doc.id).update({'isRead': true});
                       },
                     ),
