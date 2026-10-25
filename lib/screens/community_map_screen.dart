@@ -14,6 +14,7 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
   GoogleMapController? mapController;
   Position? _currentPosition;
   Set<Marker> _placeMarkers = {};
+  LatLng? _pendingPoint;
   bool _isLoading = true;
 
   static const List<String> _ratingEmoji = ['🟢', '🟡', '🔴'];
@@ -172,6 +173,132 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
     }).toSet();
   }
 
+  Future<void> _onMapLongPress(LatLng point) async {
+    setState(() => _pendingPoint = point);
+
+    final nameController = TextEditingController();
+    String? errorText;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            void submit(int rating) {
+              final name = nameController.text.trim();
+              if (name.isEmpty) {
+                setSheetState(() => errorText = "Enter the store name first.");
+                return;
+              }
+              Navigator.pop(sheetContext);
+              _submitRemoteRating(point, name, rating);
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                top: 24,
+                left: 24,
+                right: 24,
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      "Rate a store",
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      "The pin will go where you pressed on the map.",
+                      style: TextStyle(color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        labelText: "Store name",
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        prefixIcon: const Icon(Icons.storefront),
+                      ),
+                    ),
+                    if (errorText != null) ...[
+                      const SizedBox(height: 8),
+                      Text(errorText!, style: const TextStyle(color: Colors.red)),
+                    ],
+                    const SizedBox(height: 16),
+                    _ratingButton("🟢", "Clear tags, easy to navigate", () => submit(1)),
+                    const SizedBox(height: 10),
+                    _ratingButton("🟡", "A bit busy, manageable", () => submit(2)),
+                    const SizedBox(height: 10),
+                    _ratingButton("🔴", "Confusing math, high stress", () => submit(3)),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (mounted) setState(() => _pendingPoint = null);
+  }
+
+  Widget _ratingButton(String emoji, String title, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        backgroundColor: Colors.grey[100],
+        foregroundColor: Colors.black87,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      onPressed: onPressed,
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 26)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submitRemoteRating(LatLng point, String name, int rating) async {
+    try {
+      await FirebaseFirestore.instance.collection('cognitive_ratings').add({
+        'storeName': name,
+        'latitude': point.latitude,
+        'longitude': point.longitude,
+        'rating': rating,
+        'ratedRemotely': true,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Thanks! $name has been added to the map.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not save your rating: $e')),
+        );
+      }
+    }
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
     if (_currentPosition != null) {
@@ -211,17 +338,28 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
                     ? _buildRatingMarkers(snapshot.data!.docs)
                     : <Marker>{};
 
+                final Set<Marker> pendingMarker = _pendingPoint == null
+                    ? <Marker>{}
+                    : {
+                        Marker(
+                          markerId: const MarkerId('pending_rating'),
+                          position: _pendingPoint!,
+                          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueViolet),
+                        ),
+                      };
+
                 return Stack(
                   children: [
                     GoogleMap(
                       onMapCreated: _onMapCreated,
+                      onLongPress: _onMapLongPress,
                       initialCameraPosition: CameraPosition(
                         target: initialTarget,
                         zoom: 14.0,
                       ),
                       myLocationEnabled: _currentPosition != null,
                       myLocationButtonEnabled: false,
-                      markers: {..._placeMarkers, ...ratingMarkers},
+                      markers: {..._placeMarkers, ...ratingMarkers, ...pendingMarker},
                     ),
                     if (snapshot.hasError)
                       Positioned(
@@ -240,6 +378,31 @@ class _CommunityMapScreenState extends State<CommunityMapScreen> {
                           ),
                         ),
                       ),
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.touch_app_outlined, size: 20),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "Not at the store? Press and hold the map where it is to rate it.",
+                                style: TextStyle(fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 );
               },
