@@ -14,7 +14,7 @@ class BudgetSetupScreen extends StatefulWidget {
 class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
   double _currentBudgetValue = 50.0;
   double _maxBudgetValue = 200.0;
-  final double _minBudgetValue = 10.0;
+  final double _minBudgetValue = 1.0;
   final double _stepSize = 10.0;
 
   Color _getSliderColor() {

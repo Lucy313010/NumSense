@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'cart_manager.dart';
+import 'budget_manager.dart';
 import 'scan_purpose.dart';
 import 'shopping_camera_screen.dart';
 import 'weight_item_screen.dart';
 import 'app_drawer.dart';
 import 'custom_app_bar.dart';
+
 class AddItemOptionsScreen extends StatelessWidget {
   const AddItemOptionsScreen({super.key});
 
@@ -72,11 +74,59 @@ class AddItemOptionsScreen extends StatelessWidget {
                     onPressed: () {
                       final name = nameController.text.trim();
                       final price = double.tryParse(priceController.text.trim());
+                      
                       if (name.isEmpty || price == null || price <= 0) {
                         setSheetState(() => errorText = "Enter an item name and a price above \$0.");
                         return;
                       }
+
+                      final remainingBudget = BudgetManager.instance.budget.value;
+                      
+                      if (price > remainingBudget) {
+                       
+                        showDialog(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            title: const Row(
+                              children: [
+                                Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                                SizedBox(width: 8),
+                                Text("Not enough money"),
+                              ],
+                            ),
+                            content: Text(
+                              "You only have \$${remainingBudget.toStringAsFixed(2)} left, but this item costs \$${price.toStringAsFixed(2)}.\n\nWould you like to stop shopping and go to checkout?",
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext); 
+                                },
+                                child: const Text("Cancel"),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                ),
+                                onPressed: () {
+
+                                  Navigator.pop(dialogContext);
+                                  Navigator.pop(sheetContext);
+                                  Navigator.pop(screenContext);
+                                },
+                                child: const Text("Go to Checkout"),
+                              ),
+                            ],
+                          ),
+                        );
+                        return; 
+                      }
+
+
                       CartManager.instance.addItem(CartItem(name: name, price: price));
+         
                       Navigator.pop(sheetContext);
                       Navigator.pop(screenContext);
                     },
@@ -97,7 +147,7 @@ class AddItemOptionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "Item Details"),
+      appBar: const CustomAppBar(title: "Item Details"),
       drawer: const AppDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
