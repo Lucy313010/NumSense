@@ -13,8 +13,8 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
   double _currentBudgetValue = 50.0;
 
   Color _getSliderColor() {
-    if (_currentBudgetValue < 60) return Colors.blueAccent;
-    if (_currentBudgetValue < 140) return Colors.orangeAccent;
+    if (_currentBudgetValue < 40) return Colors.blueAccent;
+    if (_currentBudgetValue < 80) return Colors.orangeAccent;
     return Colors.redAccent;
   }
 
@@ -80,9 +80,9 @@ class _BudgetSetupScreenState extends State<BudgetSetupScreen> {
                 ),
                 child: Slider(
                   value: _currentBudgetValue,
-                  min: 10.0,
-                  max: 200.0,
-                  divisions: 19,
+                  min: 1.0,
+                  max: 100.0,
+                  divisions: 99,
                   label: '\$${_currentBudgetValue.toStringAsFixed(0)}',
                   activeColor: _getSliderColor(),
                   inactiveColor: Colors.grey[200],
