@@ -195,7 +195,8 @@ class ProfileScreen extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 12),
                                         Text(
-                                          '\$${itemPrice.toStringAsFixed(0)} / \$${displayBudgetBefore.toStringAsFixed(0)} spent',
+                                          // Restored exact decimals for math clarity!
+                                          '\$${itemPrice.toStringAsFixed(2)} / \$${displayBudgetBefore.toStringAsFixed(2)} budget',
                                           style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                                         ),
                                       ],

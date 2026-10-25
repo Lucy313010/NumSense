@@ -120,10 +120,9 @@ class ActiveShoppingListScreen extends StatelessWidget {
            valueListenable: CartManager.instance.items,
            builder: (context, cartItems, __) {
              
-             // Dynamically calculate slider boundaries - forcefully rounded to whole numbers
              double sliderMin = 0.0; 
-             double sliderMax = (budget > 200.0 ? budget : 200.0).roundToDouble();
-             double safeBudget = budget.clamp(sliderMin, sliderMax).roundToDouble();
+             double sliderMax = budget > 200.0 ? budget : 200.0;
+             double safeBudget = budget.clamp(sliderMin, sliderMax);
 
              return Padding(
                padding: const EdgeInsets.all(24.0),
@@ -133,12 +132,12 @@ class ActiveShoppingListScreen extends StatelessWidget {
                    const SizedBox(height: 10),
                    Center(
                      child: Text(
-                       // Changed to 0 decimal places to hide cents
-                       '\$${safeBudget.toStringAsFixed(0)}',
+                       // RESTORED: Shows the exact remaining budget including cents (e.g. $45.01)
+                       '\$${budget.toStringAsFixed(2)}',
                        style: TextStyle(
                          fontSize: 40,
                          fontWeight: FontWeight.w900,
-                         color: _getSliderColor(safeBudget),
+                         color: _getSliderColor(budget),
                        ),
                      ),
                    ),
@@ -163,12 +162,16 @@ class ActiveShoppingListScreen extends StatelessWidget {
                        value: safeBudget,
                        min: sliderMin,
                        max: sliderMax,
-                       label: '\$${safeBudget.toStringAsFixed(0)}',
-                       activeColor: _getSliderColor(safeBudget),
+                       activeColor: _getSliderColor(budget),
                        inactiveColor: Colors.grey[200],
                        onChanged: (double value) {
-                         // Forces the budget to only use whole numbers (no cents)
-                         BudgetManager.instance.setBudget(value.roundToDouble()); 
+                         // MATH FIX: Force the *Initial Budget* to be a whole number, 
+                         // but keep the exact remaining cents perfectly accurate!
+                         double spent = CartManager.instance.totalSpent;
+                         double newInitialBudget = (value + spent).roundToDouble();
+                         double exactRemainingBudget = newInitialBudget - spent;
+                         
+                         BudgetManager.instance.setBudget(exactRemainingBudget); 
                        },
                      ),
                    ),
@@ -249,7 +252,7 @@ class ActiveShoppingListScreen extends StatelessWidget {
                                            ),
                                            const SizedBox(width: 12),
                                            Text(
-                                             '\$${item.price.toStringAsFixed(0)} / \$${displayBudgetBefore.toStringAsFixed(0)} spent',
+                                             '\$${item.price.toStringAsFixed(2)} / \$${displayBudgetBefore.toStringAsFixed(2)} budget',
                                              style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                                            ),
                                          ],

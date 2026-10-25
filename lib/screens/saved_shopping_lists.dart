@@ -86,7 +86,8 @@ class _SavedShoppingListsScreenState extends State<SavedShoppingListsScreen> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                '\$${item.price.toStringAsFixed(0)} / \$${displayBudgetBefore.toStringAsFixed(0)} spent',
+                                // Exact decimals for accuracy
+                                '\$${item.price.toStringAsFixed(2)} / \$${displayBudgetBefore.toStringAsFixed(2)} budget',
                                 style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.w600),
                               ),
                             ],
