@@ -3,7 +3,6 @@ import 'cart_manager.dart';
 import 'budget_manager.dart';
 import 'scan_purpose.dart';
 import 'shopping_camera_screen.dart';
-import 'weight_item_screen.dart';
 import 'app_drawer.dart';
 import 'custom_app_bar.dart';
 
@@ -74,16 +73,15 @@ class AddItemOptionsScreen extends StatelessWidget {
                     onPressed: () {
                       final name = nameController.text.trim();
                       final price = double.tryParse(priceController.text.trim());
-                      
+
                       if (name.isEmpty || price == null || price <= 0) {
                         setSheetState(() => errorText = "Enter an item name and a price above \$0.");
                         return;
                       }
 
                       final remainingBudget = BudgetManager.instance.budget.value;
-                      
+
                       if (price > remainingBudget) {
-                       
                         showDialog(
                           context: context,
                           builder: (dialogContext) => AlertDialog(
@@ -101,7 +99,7 @@ class AddItemOptionsScreen extends StatelessWidget {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.pop(dialogContext); 
+                                  Navigator.pop(dialogContext);
                                 },
                                 child: const Text("Cancel"),
                               ),
@@ -111,7 +109,6 @@ class AddItemOptionsScreen extends StatelessWidget {
                                   foregroundColor: Colors.white,
                                 ),
                                 onPressed: () {
-
                                   Navigator.pop(dialogContext);
                                   Navigator.pop(sheetContext);
                                   Navigator.pop(screenContext);
@@ -121,12 +118,11 @@ class AddItemOptionsScreen extends StatelessWidget {
                             ],
                           ),
                         );
-                        return; 
+                        return;
                       }
 
-
                       CartManager.instance.addItem(CartItem(name: name, price: price));
-         
+
                       Navigator.pop(sheetContext);
                       Navigator.pop(screenContext);
                     },
@@ -187,24 +183,6 @@ class AddItemOptionsScreen extends StatelessWidget {
                 );
               },
               child: const Text("Add Item by Fixed Price Scan"),
-            ),
-            const SizedBox(height: 32),
-            const Divider(),
-            const SizedBox(height: 16),
-            const Text(
-              "Add Item by Weight:",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.scale),
-              label: const Text("Scan Price Tag & Weigh Item"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const WeightItemScreen()),
-                );
-              },
             ),
           ],
         ),
